@@ -1,6 +1,7 @@
 plugins {
     kotlin("jvm")
     kotlin("plugin.serialization")
+    id("com.google.devtools.ksp")
 }
 
 group = "com.johnturkson.sync"
@@ -12,6 +13,8 @@ repositories {
 }
 
 dependencies {
+    implementation(project(":generator"))
+    ksp(project(":generator"))
     implementation(kotlin("stdlib"))
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2")
 }

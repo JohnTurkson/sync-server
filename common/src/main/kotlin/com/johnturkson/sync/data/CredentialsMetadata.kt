@@ -1,14 +1,14 @@
 package com.johnturkson.sync.data
 
+import com.johnturkson.sync.generator.annotations.Resource
 import kotlinx.serialization.Serializable
 import kotlin.properties.Delegates
 
 @Serializable
-// @DynamoDbImmutable(builder = CredentialsMetadata.Builder::class)
+@Resource
 data class CredentialsMetadata(
-    // @get:DynamoDbPartitionKey
-    override val id: String,
-) : Metadata<Credentials> {
+    val id: String,
+) {
     class Builder {
         private var id by Delegates.notNull<String>()
         

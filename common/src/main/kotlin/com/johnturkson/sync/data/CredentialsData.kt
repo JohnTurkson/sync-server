@@ -1,15 +1,16 @@
 package com.johnturkson.sync.data
 
+import com.johnturkson.sync.generator.annotations.Resource
 import kotlinx.serialization.Serializable
 import kotlin.properties.Delegates
 
 @Serializable
-// @DynamoDbImmutable(builder = CredentialsData.Builder::class)
+@Resource
 data class CredentialsData(
     val service: String,
     val login: String,
     val password: String,
-) : Data<Credentials> {
+) {
     class Builder {
         private var service by Delegates.notNull<String>()
         private var login by Delegates.notNull<String>()

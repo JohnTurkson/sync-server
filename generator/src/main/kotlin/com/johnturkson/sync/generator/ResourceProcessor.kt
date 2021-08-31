@@ -13,12 +13,13 @@ class ResourceProcessor(
     private val options: Map<String, String>,
 ) : SymbolProcessor {
     override fun process(resolver: Resolver): List<KSAnnotated> {
-        val resourceFiles = resolver.getAllFiles().filterIsInstance<KSClassDeclaration>()
-        resourceFiles.forEach { resource -> processResource(resource) }
+        val resourceAnnotation = "com.johnturkson.sync.generator.annotations.Resource"
+        val resourceClasses = resolver.getSymbolsWithAnnotation(resourceAnnotation).filterIsInstance<KSClassDeclaration>()
+        resourceClasses.forEach { resourceClass -> processResource(resourceClass) }
         return emptyList()
     }
     
-    private fun processResource(resource: KSClassDeclaration) {
+    private fun processResource(resourceClass: KSClassDeclaration) {
         
     }
 }
