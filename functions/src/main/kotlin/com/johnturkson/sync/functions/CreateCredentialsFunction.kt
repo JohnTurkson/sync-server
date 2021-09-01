@@ -5,12 +5,12 @@ import com.johnturkson.aws.lambda.handler.HttpLambdaFunction
 import com.johnturkson.aws.lambda.handler.events.HttpLambdaRequest
 import com.johnturkson.aws.lambda.handler.events.HttpLambdaResponse
 import com.johnturkson.security.generateSecureRandomBytes
-import com.johnturkson.sync.data.Credentials
-import com.johnturkson.sync.data.CredentialsMetadata
-import com.johnturkson.sync.requests.CreateCredentialsRequest
-import com.johnturkson.sync.resources.Resources.CredentialsTable
-import com.johnturkson.sync.resources.Resources.Serializer
-import com.johnturkson.sync.responses.CreateCredentialsResponse
+import com.johnturkson.sync.common.data.Credentials
+import com.johnturkson.sync.common.data.CredentialsMetadata
+import com.johnturkson.sync.common.requests.CreateCredentialsRequest
+import com.johnturkson.sync.common.responses.CreateCredentialsResponse
+import com.johnturkson.sync.functions.resources.Resources.CredentialsTable
+import com.johnturkson.sync.functions.resources.Resources.Serializer
 import com.johnturkson.text.encodeBase64
 
 class CreateCredentialsFunction : HttpLambdaFunction<CreateCredentialsRequest, CreateCredentialsResponse> {

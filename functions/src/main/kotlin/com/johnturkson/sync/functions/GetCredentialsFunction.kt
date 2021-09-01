@@ -4,10 +4,10 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.johnturkson.aws.lambda.handler.HttpLambdaFunction
 import com.johnturkson.aws.lambda.handler.events.HttpLambdaRequest
 import com.johnturkson.aws.lambda.handler.events.HttpLambdaResponse
-import com.johnturkson.sync.requests.GetCredentialsRequest
-import com.johnturkson.sync.resources.Resources.CredentialsTable
-import com.johnturkson.sync.resources.Resources.Serializer
-import com.johnturkson.sync.responses.GetCredentialsResponse
+import com.johnturkson.sync.common.requests.GetCredentialsRequest
+import com.johnturkson.sync.common.responses.GetCredentialsResponse
+import com.johnturkson.sync.functions.resources.Resources.CredentialsTable
+import com.johnturkson.sync.functions.resources.Resources.Serializer
 import software.amazon.awssdk.enhanced.dynamodb.Key
 
 class GetCredentialsFunction : HttpLambdaFunction<GetCredentialsRequest, GetCredentialsResponse> {

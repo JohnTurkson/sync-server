@@ -14,7 +14,7 @@ repositories {
 dependencies {
     implementation(project(":common"))
     implementation(kotlin("stdlib"))
-    // implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2")
     implementation("com.johnturkson.aws:aws-lambda-handler:0.0.6")
     implementation("com.johnturkson.security:security-tools:0.0.4")
     implementation("com.johnturkson.text:text-tools:0.0.2")
@@ -23,13 +23,6 @@ dependencies {
     implementation("software.amazon.awssdk:dynamodb-enhanced") {
         exclude(group = "software.amazon.awssdk", module = "apache-client")
         exclude(group = "software.amazon.awssdk", module = "netty-nio-client")
-    }
-}
-
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(11))
-        vendor.set(JvmVendorSpec.AMAZON)
     }
 }
 
@@ -51,4 +44,11 @@ tasks.register<Zip>("buildLambdaFunctions") {
     destinationDirectory.set(file("$buildDir/lambda/functions"))
     from(tasks.named("compileKotlin"))
     from(tasks.named("processResources"))
+}
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(11))
+        vendor.set(JvmVendorSpec.AMAZON)
+    }
 }
