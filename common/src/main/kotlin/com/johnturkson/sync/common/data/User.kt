@@ -6,9 +6,9 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @Resource
-data class Credentials(
+data class User(
     @Flatten
-    val metadata: CredentialsMetadata,
+    val metadata: UserMetadata,
     @Flatten
-    val data: CredentialsData,
+    val data: UserData,
 )

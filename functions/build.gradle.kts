@@ -18,8 +18,9 @@ dependencies {
     implementation("com.johnturkson.aws:aws-lambda-handler:0.0.6")
     implementation("com.johnturkson.security:security-tools:0.0.4")
     implementation("com.johnturkson.text:text-tools:0.0.2")
-    implementation(platform("software.amazon.awssdk:bom:2.17.24"))
-    implementation("software.amazon.awssdk:aws-crt-client:2.17.24-PREVIEW")
+    implementation("org.springframework.security:spring-security-crypto:5.5.2")
+    implementation(platform("software.amazon.awssdk:bom:2.17.31"))
+    implementation("software.amazon.awssdk:aws-crt-client:2.17.31-PREVIEW")
     implementation("software.amazon.awssdk:dynamodb-enhanced") {
         exclude(group = "software.amazon.awssdk", module = "apache-client")
         exclude(group = "software.amazon.awssdk", module = "netty-nio-client")

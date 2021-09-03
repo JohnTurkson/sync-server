@@ -1,12 +1,13 @@
 package com.johnturkson.sync.common.data
 
 import com.johnturkson.sync.generators.annotations.PrimaryPartitionKey
-import com.johnturkson.sync.generators.annotations.ResourceMetadata
+import com.johnturkson.sync.generators.annotations.Resource
 import kotlinx.serialization.Serializable
 
 @Serializable
-@ResourceMetadata
-data class CredentialsMetadata(
+@Resource
+data class UserCredentials(
     @PrimaryPartitionKey
-    val id: String,
+    val email: String,
+    val password: String,
 )
