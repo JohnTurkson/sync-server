@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @ResourceData
-data class CredentialsData(
+data class ItemData(
     val service: String,
     val login: String,
     val password: String,

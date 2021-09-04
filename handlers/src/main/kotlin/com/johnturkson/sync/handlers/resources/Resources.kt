@@ -1,6 +1,9 @@
-package com.johnturkson.sync.functions.resources
+package com.johnturkson.sync.handlers.resources
 
-import com.johnturkson.sync.common.generated.CredentialsItem
+import com.johnturkson.sync.common.generated.AuthorizationObject
+import com.johnturkson.sync.common.generated.ItemObject
+import com.johnturkson.sync.common.generated.UserCredentialsObject
+import com.johnturkson.sync.common.generated.UserObject
 import kotlinx.serialization.json.Json
 import software.amazon.awssdk.auth.credentials.EnvironmentVariableCredentialsProvider
 import software.amazon.awssdk.core.SdkSystemSetting
@@ -14,6 +17,7 @@ object Resources {
         ignoreUnknownKeys = true
         encodeDefaults = true
     }
+    
     val DynamoDbClient = DynamoDbEnhancedAsyncClient.builder()
         .dynamoDbClient(
             DynamoDbAsyncClient.builder()
@@ -24,5 +28,12 @@ object Resources {
         )
         .build()
     
-    val CredentialsTable = DynamoDbClient.table("Credentials", CredentialsItem.SCHEMA)
+    val ItemsTable = DynamoDbClient.table("SyncItems", ItemObject.SCHEMA)
+    val ItemsUserIndex = ItemsTable.index("SyncItemsUserIndex")
+    
+    val UsersTable = DynamoDbClient.table("SyncUsers", UserObject.SCHEMA)
+    val UserCredentialsTable = DynamoDbClient.table("SyncUserCredentials", UserCredentialsObject.SCHEMA)
+    
+    val AuthorizationTable = DynamoDbClient.table("SyncAuthorization", AuthorizationObject.SCHEMA)
+    val AuthorizationUserIndex = AuthorizationTable.index("SyncAuthorizationUserIndex")
 }

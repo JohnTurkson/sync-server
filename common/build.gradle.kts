@@ -17,7 +17,7 @@ dependencies {
     ksp(project(":generators"))
     implementation(kotlin("stdlib"))
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2")
-    implementation(platform("software.amazon.awssdk:bom:2.17.24"))
+    implementation(platform("software.amazon.awssdk:bom:2.17.31"))
     implementation("software.amazon.awssdk:dynamodb-enhanced") {
         exclude(group = "software.amazon.awssdk", module = "apache-client")
         exclude(group = "software.amazon.awssdk", module = "netty-nio-client")

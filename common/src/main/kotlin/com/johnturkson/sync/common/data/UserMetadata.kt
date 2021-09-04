@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @ResourceMetadata
-data class CredentialsMetadata(
+data class UserMetadata(
     @PrimaryPartitionKey
     val id: String,
 )

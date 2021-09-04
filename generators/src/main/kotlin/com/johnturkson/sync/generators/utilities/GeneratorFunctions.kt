@@ -4,8 +4,7 @@ import com.google.devtools.ksp.getDeclaredProperties
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.Dependencies
 import com.google.devtools.ksp.symbol.KSClassDeclaration
-import com.johnturkson.sync.generators.annotations.Flatten
-import com.johnturkson.sync.generators.annotations.PrimaryPartitionKey
+import com.johnturkson.sync.generators.annotations.*
 
 fun generateBuilderClass(resourceClass: KSClassDeclaration, codeGenerator: CodeGenerator) {
     val resourceProperties = resourceClass.getDeclaredProperties()
@@ -83,7 +82,7 @@ fun generateSchemaObject(resourceClass: KSClassDeclaration, codeGenerator: CodeG
     val resourceClassName = resourceClass.simpleName.asString()
     val builderClassName = "${resourceClassName}Builder"
     val generatedPackageName = "com.johnturkson.sync.common.generated"
-    val generatedClassName = "${resourceClassName}Item"
+    val generatedClassName = "${resourceClassName}Object"
     
     val generatedResourceBuilderFile = codeGenerator.createNewFile(
         Dependencies.ALL_FILES,
@@ -101,30 +100,47 @@ fun generateSchemaObject(resourceClass: KSClassDeclaration, codeGenerator: CodeG
         val name = property.simpleName.asString()
         val type = property.type.element.toString()
         val annotations = property.annotations
-            .map { annotation -> annotation.annotationType.resolve().declaration.qualifiedName?.asString() }
-            .filterNotNull()
-        
+            .groupBy { annotation -> annotation.annotationType.resolve().declaration.qualifiedName?.asString() }
+    
+        val tags = mutableSetOf<String>()
+        annotations.forEach { (name, annotation) ->
+            when (name) {
+                PrimaryPartitionKey::class.qualifiedName -> {
+                    imports += "import software.amazon.awssdk.enhanced.dynamodb.mapper.StaticAttributeTags"
+                    tags += "StaticAttributeTags.primaryPartitionKey()"
+                }
+                PrimarySortKey::class.qualifiedName -> {
+                    imports += "import software.amazon.awssdk.enhanced.dynamodb.mapper.StaticAttributeTags"
+                    tags += "StaticAttributeTags.primarySortKey()"
+                }
+                SecondaryPartitionKey::class.qualifiedName -> {
+                    imports += "import software.amazon.awssdk.enhanced.dynamodb.mapper.StaticAttributeTags"
+                    val index = annotation.first().arguments.first().value.toString()
+                    tags += "StaticAttributeTags.secondaryPartitionKey(\"$index\")"
+                }
+                SecondarySortKey::class.qualifiedName -> {
+                    imports += "import software.amazon.awssdk.enhanced.dynamodb.mapper.StaticAttributeTags"
+                    val index = annotation.first().arguments.first().value.toString()
+                    tags += "StaticAttributeTags.secondarySortKey(\"$index\")"
+                }
+            }
+        }
+    
         if (Flatten::class.qualifiedName in annotations) {
-            ".flatten(${type}Item.SCHEMA, $resourceClassName::$name, $builderClassName::$name)"
-        } else if (PrimaryPartitionKey::class.qualifiedName in annotations) {
-            imports += "import software.amazon.awssdk.enhanced.dynamodb.mapper.StaticAttributeTags"
-            
-            """
-                |.addAttribute($type::class.java) { attribute ->
-                |    attribute.name("$name")
-                |        .getter($resourceClassName::$name)
-                |        .setter($builderClassName::$name)
-                |        .tags(StaticAttributeTags.primaryPartitionKey())
-                |}
-            """.trimMargin()
+            ".flatten(${type}Object.SCHEMA, $resourceClassName::$name, $builderClassName::$name)"
         } else {
-            """
-                |.addAttribute($type::class.java) { attribute ->
-                |    attribute.name("$name")
-                |        .getter($resourceClassName::$name)
-                |        .setter($builderClassName::$name)
-                |}
-            """.trimMargin()
+            buildString {
+                appendLine(".addAttribute($type::class.java) { attribute ->")
+                appendLine("attribute.name(\"$name\")")
+                appendLine(".getter($resourceClassName::$name)")
+                appendLine(".setter($builderClassName::$name)")
+                if (tags.isNotEmpty()) {
+                    appendLine(".tags(")
+                    appendLine(tags.sorted().joinToString(separator = ",\n"))
+                    appendLine(")")
+                }
+                append("}")
+            }
         }
     }.joinToString(separator = "\n")
     

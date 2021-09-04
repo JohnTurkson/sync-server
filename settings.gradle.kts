@@ -1,4 +1,4 @@
 rootProject.name = "sync-server"
 include("common")
-include("functions")
+include("handlers")
 include("generators")
