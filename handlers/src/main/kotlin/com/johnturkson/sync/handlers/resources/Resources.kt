@@ -1,4 +1,4 @@
-package com.johnturkson.sync.functions.resources
+package com.johnturkson.sync.handlers.resources
 
 import com.johnturkson.sync.common.generated.AuthorizationObject
 import com.johnturkson.sync.common.generated.ItemObject
@@ -31,11 +31,9 @@ object Resources {
     val ItemsTable = DynamoDbClient.table("SyncItems", ItemObject.SCHEMA)
     val ItemsUserIndex = ItemsTable.index("SyncItemsUserIndex")
     
-    val AuthorizationTable = DynamoDbClient.table("SyncAuthorization", AuthorizationObject.SCHEMA)
-    val AuthorizationUserIndex = AuthorizationTable.index("SyncAuthorizationUserIndex")
-    
+    val UsersTable = DynamoDbClient.table("SyncUsers", UserObject.SCHEMA)
     val UserCredentialsTable = DynamoDbClient.table("SyncUserCredentials", UserCredentialsObject.SCHEMA)
     
-    val UsersTable = DynamoDbClient.table("SyncUsers", UserObject.SCHEMA)
-    val UsersIdIndex = UsersTable.index("SyncUsersIdIndex")
+    val AuthorizationTable = DynamoDbClient.table("SyncAuthorization", AuthorizationObject.SCHEMA)
+    val AuthorizationUserIndex = AuthorizationTable.index("SyncAuthorizationUserIndex")
 }

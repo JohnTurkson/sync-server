@@ -9,6 +9,4 @@ import kotlinx.serialization.Serializable
 data class User(
     @Flatten
     val metadata: UserMetadata,
-    @Flatten
-    val data: UserData,
 )

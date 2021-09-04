@@ -8,6 +8,6 @@ import kotlinx.serialization.Serializable
 @Resource
 data class UserCredentials(
     @PrimaryPartitionKey
-    val email: String,
+    val user: String,
     val password: String,
 )

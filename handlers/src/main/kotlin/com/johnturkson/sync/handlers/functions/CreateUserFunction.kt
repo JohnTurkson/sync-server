@@ -1,16 +1,19 @@
-package com.johnturkson.sync.functions
+package com.johnturkson.sync.handlers.functions
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.johnturkson.aws.lambda.handler.HttpLambdaFunction
 import com.johnturkson.aws.lambda.handler.events.HttpLambdaRequest
 import com.johnturkson.aws.lambda.handler.events.HttpLambdaResponse
-import com.johnturkson.security.generateSecureRandomBytes
-import com.johnturkson.sync.common.data.*
+import com.johnturkson.sync.common.data.Authorization
+import com.johnturkson.sync.common.data.User
+import com.johnturkson.sync.common.data.UserCredentials
+import com.johnturkson.sync.common.data.UserMetadata
 import com.johnturkson.sync.common.requests.CreateUserRequest
 import com.johnturkson.sync.common.responses.CreateUserResponse
-import com.johnturkson.sync.functions.resources.Resources
-import com.johnturkson.sync.functions.utilities.hashPassword
-import com.johnturkson.text.encodeBase64
+import com.johnturkson.sync.handlers.resources.Resources
+import com.johnturkson.sync.handlers.utilities.generateAuthorizationToken
+import com.johnturkson.sync.handlers.utilities.generateResourceId
+import com.johnturkson.sync.handlers.utilities.hashPassword
 import software.amazon.awssdk.enhanced.dynamodb.Expression
 import software.amazon.awssdk.enhanced.dynamodb.model.PutItemEnhancedRequest
 
@@ -23,13 +26,12 @@ class CreateUserFunction : HttpLambdaFunction<CreateUserRequest, CreateUserRespo
         request: HttpLambdaRequest<CreateUserRequest>,
         context: Context,
     ): HttpLambdaResponse<CreateUserResponse> {
-        val (email, password) = request.body.data
-        val id = generateSecureRandomBytes(16).encodeBase64()
+        val password = request.body.password
+        val id = generateResourceId()
         val userMetadata = UserMetadata(id)
-        val userData = UserData(email)
-        val user = User(userMetadata, userData)
-        val userCredentials = UserCredentials(email, hashPassword(password))
-        val token = generateSecureRandomBytes(16).encodeBase64()
+        val user = User(userMetadata)
+        val userCredentials = UserCredentials(id, password.hashPassword())
+        val token = generateAuthorizationToken()
         val authorization = Authorization(token, user.metadata.id)
         
         Resources.DynamoDbClient.transactWriteItems { transaction ->
