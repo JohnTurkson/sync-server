@@ -1,4 +1,4 @@
-package com.johnturkson.sync.generators.utilities
+package com.johnturkson.sync.generators.functions
 
 import com.google.devtools.ksp.closestClassDeclaration
 import com.google.devtools.ksp.getDeclaredProperties
