@@ -17,7 +17,8 @@ class ResourceDataProcessor(
 ) : SymbolProcessor {
     override fun process(resolver: Resolver): List<KSAnnotated> {
         val resourceAnnotation = requireNotNull(ResourceData::class.qualifiedName)
-        val resourceDataClasses = resolver.getSymbolsWithAnnotation(resourceAnnotation).filterIsInstance<KSClassDeclaration>()
+        val resourceDataClasses = resolver.getSymbolsWithAnnotation(resourceAnnotation)
+            .filterIsInstance<KSClassDeclaration>()
         
         resourceDataClasses.forEach { resourceClass ->
             generateBuilderClass(resourceClass, codeGenerator)
