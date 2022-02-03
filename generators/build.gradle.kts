@@ -11,8 +11,8 @@ repositories {
 }
 
 dependencies {
-    implementation(kotlin("stdlib"))
-    implementation("com.google.devtools.ksp:symbol-processing-api:1.5.30-1.0.0-beta08")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.6.10")
+    implementation("com.google.devtools.ksp:symbol-processing-api:1.6.10-1.0.2")
 }
 
 java {
