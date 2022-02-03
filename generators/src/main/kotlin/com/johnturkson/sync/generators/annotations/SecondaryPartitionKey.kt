@@ -1,3 +1,3 @@
 package com.johnturkson.sync.generators.annotations
 
-annotation class SecondaryPartitionKey(val index: String)
+annotation class SecondaryPartitionKey(val indexName: String)
