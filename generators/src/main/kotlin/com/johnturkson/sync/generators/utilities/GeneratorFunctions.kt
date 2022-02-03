@@ -1,9 +1,11 @@
 package com.johnturkson.sync.generators.utilities
 
+import com.google.devtools.ksp.closestClassDeclaration
 import com.google.devtools.ksp.getDeclaredProperties
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.Dependencies
 import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.johnturkson.sync.generators.annotations.Flatten
 import com.johnturkson.sync.generators.annotations.PrimaryPartitionKey
 import com.johnturkson.sync.generators.annotations.PrimarySortKey
@@ -140,6 +142,8 @@ fun generateSchemaObject(resourceClass: KSClassDeclaration, codeGenerator: CodeG
             }
         }
         
+        indices += findIndices(property)
+        
         if (Flatten::class.qualifiedName in annotations) {
             ".flatten(${type}Object.SCHEMA, $resourceClassName::$name, $builderClassName::$name)"
         } else {
@@ -227,4 +231,34 @@ fun generateSchemaObject(resourceClass: KSClassDeclaration, codeGenerator: CodeG
     """.trimMargin()
     
     generatedResourceBuilderFile.bufferedWriter().use { writer -> writer.write(generatedClass) }
+}
+
+fun findIndices(property: KSPropertyDeclaration): Set<String> {
+    val indices = mutableSetOf<String>()
+    
+    val targetAnnotations = setOf(
+        SecondaryPartitionKey::class.qualifiedName,
+        SecondarySortKey::class.qualifiedName,
+    )
+    
+    val resourceProperties = property.type
+        .resolve()
+        .declaration
+        .closestClassDeclaration()
+        ?.getDeclaredProperties()
+    
+    resourceProperties?.forEach { resourceProperty ->
+        val annotations = resourceProperty.annotations.groupBy { annotation ->
+            annotation.annotationType.resolve().declaration.qualifiedName?.asString()
+        }
+        
+        annotations.forEach { (name, annotation) ->
+            if (name in targetAnnotations) {
+                val index = annotation.first().arguments.first().value.toString()
+                indices += index
+            }
+        }
+    }
+    
+    return indices
 }
