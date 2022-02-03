@@ -93,7 +93,8 @@ fun generateSchemaObject(resourceClass: KSClassDeclaration, codeGenerator: CodeG
     
     val imports = mutableSetOf(
         "import ${resourceClass.qualifiedName?.asString()}",
-        "import software.amazon.awssdk.enhanced.dynamodb.TableSchema"
+        "import software.amazon.awssdk.enhanced.dynamodb.TableSchema",
+        "import software.amazon.awssdk.enhanced.dynamodb.mapper.StaticImmutableTableSchema"
     )
     
     val schemaProperties = resourceProperties.map { property ->
@@ -101,7 +102,7 @@ fun generateSchemaObject(resourceClass: KSClassDeclaration, codeGenerator: CodeG
         val type = property.type.element.toString()
         val annotations = property.annotations
             .groupBy { annotation -> annotation.annotationType.resolve().declaration.qualifiedName?.asString() }
-    
+        
         val tags = mutableSetOf<String>()
         annotations.forEach { (name, annotation) ->
             when (name) {
@@ -125,7 +126,7 @@ fun generateSchemaObject(resourceClass: KSClassDeclaration, codeGenerator: CodeG
                 }
             }
         }
-    
+        
         if (Flatten::class.qualifiedName in annotations) {
             ".flatten(${type}Object.SCHEMA, $resourceClassName::$name, $builderClassName::$name)"
         } else {
@@ -145,10 +146,11 @@ fun generateSchemaObject(resourceClass: KSClassDeclaration, codeGenerator: CodeG
     }.joinToString(separator = "\n")
     
     val schema = """
-        |val SCHEMA = TableSchema.builder($resourceClassName::class.java, $builderClassName::class.java)
-        |    .newItemBuilder(::$builderClassName, $builderClassName::build)
-        |    $schemaProperties
-        |    .build()
+        |val SCHEMA: StaticImmutableTableSchema<$resourceClassName, $builderClassName> =
+        |    TableSchema.builder($resourceClassName::class.java, $builderClassName::class.java)
+        |       .newItemBuilder(::$builderClassName, $builderClassName::build)
+        |       $schemaProperties
+        |       .build()
     """.trimMargin()
     
     val generatedClass = """
