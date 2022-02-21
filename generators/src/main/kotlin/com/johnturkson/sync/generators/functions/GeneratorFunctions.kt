@@ -107,8 +107,7 @@ fun generateSchemaObject(resourceClass: KSClassDeclaration, codeGenerator: CodeG
         "import software.amazon.awssdk.enhanced.dynamodb.mapper.StaticImmutableTableSchema"
     )
     
-    val tags = mutableSetOf<String>()
-    val indices = mutableSetOf<String>()
+    val tableIndices = mutableSetOf<String>()
     
     val schemaProperties = resourceProperties.map { property ->
         val name = property.simpleName.asString()
@@ -117,6 +116,7 @@ fun generateSchemaObject(resourceClass: KSClassDeclaration, codeGenerator: CodeG
             annotation.annotationType.resolve().declaration.qualifiedName?.asString()
         }
         
+        val tags = mutableSetOf<String>()
         annotations.forEach { (name, annotation) ->
             when (name) {
                 PrimaryPartitionKey::class.qualifiedName -> {
@@ -131,18 +131,18 @@ fun generateSchemaObject(resourceClass: KSClassDeclaration, codeGenerator: CodeG
                     imports += "import software.amazon.awssdk.enhanced.dynamodb.mapper.StaticAttributeTags"
                     val index = annotation.first().arguments.first().value.toString()
                     tags += "StaticAttributeTags.secondaryPartitionKey(\"$index\")"
-                    indices += index
+                    tableIndices += index
                 }
                 SecondarySortKey::class.qualifiedName -> {
                     imports += "import software.amazon.awssdk.enhanced.dynamodb.mapper.StaticAttributeTags"
                     val index = annotation.first().arguments.first().value.toString()
                     tags += "StaticAttributeTags.secondarySortKey(\"$index\")"
-                    indices += index
+                    tableIndices += index
                 }
             }
         }
         
-        indices += findIndices(property)
+        tableIndices += findTableIndices(property)
         
         if (Flatten::class.qualifiedName in annotations) {
             ".flatten(${type}Object.SCHEMA, $resourceClassName::$name, $builderClassName::$name)"
@@ -196,14 +196,14 @@ fun generateSchemaObject(resourceClass: KSClassDeclaration, codeGenerator: CodeG
             
             append(tableFields)
             
-            if (indices.isNotEmpty()) {
+            if (tableIndices.isNotEmpty()) {
                 imports += setOf(
                     "import software.amazon.awssdk.enhanced.dynamodb.DynamoDbAsyncIndex",
                     "import software.amazon.awssdk.enhanced.dynamodb.DynamoDbIndex"
                 )
             }
             
-            indices.forEach { indexName ->
+            tableIndices.forEach { indexName ->
                 val indexFields = """
                     |
                     |
@@ -233,7 +233,7 @@ fun generateSchemaObject(resourceClass: KSClassDeclaration, codeGenerator: CodeG
     generatedResourceBuilderFile.bufferedWriter().use { writer -> writer.write(generatedClass) }
 }
 
-fun findIndices(property: KSPropertyDeclaration): Set<String> {
+fun findTableIndices(property: KSPropertyDeclaration): Set<String> {
     val indices = mutableSetOf<String>()
     
     val targetAnnotations = setOf(
