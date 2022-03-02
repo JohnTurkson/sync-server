@@ -1,4 +1,4 @@
-package com.johnturkson.sync.handlers.utilities
+package com.johnturkson.sync.handlers.operations
 
 import com.johnturkson.security.generateSecureRandomBytes
 import com.johnturkson.text.encodeBase64
