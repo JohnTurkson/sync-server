@@ -1,3 +1,3 @@
 package com.johnturkson.sync.generators.annotations
 
-annotation class Resource(val tableName: String)
+annotation class Resource(val tableName: String, val tableAlias: String)

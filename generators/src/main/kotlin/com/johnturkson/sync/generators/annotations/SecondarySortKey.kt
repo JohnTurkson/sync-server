@@ -1,3 +1,3 @@
 package com.johnturkson.sync.generators.annotations
 
-annotation class SecondarySortKey(val indexName: String)
+annotation class SecondarySortKey(val indexName: String, val indexAlias: String)
