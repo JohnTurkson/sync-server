@@ -6,9 +6,11 @@ import com.johnturkson.aws.lambda.handler.events.HttpLambdaRequest
 import com.johnturkson.aws.lambda.handler.events.HttpLambdaResponse
 import com.johnturkson.sync.common.requests.ListItemsRequest
 import com.johnturkson.sync.common.responses.ListItemsResponse
+import com.johnturkson.sync.handlers.operations.listItems
+import com.johnturkson.sync.handlers.operations.verify
 import com.johnturkson.sync.handlers.resources.Resources
-import com.johnturkson.sync.handlers.utilities.listItems
-import com.johnturkson.sync.handlers.utilities.verify
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.runBlocking
 
 class ListItemsFunction : HttpLambdaFunction<ListItemsRequest, ListItemsResponse> {
     override val serializer = Resources.Serializer
@@ -21,8 +23,7 @@ class ListItemsFunction : HttpLambdaFunction<ListItemsRequest, ListItemsResponse
     ): HttpLambdaResponse<ListItemsResponse> {
         val authorization = request.body.authorization
         val user = request.body.user
-        
-        val items = authorization.verify()?.listItems(user)
+        val items = runBlocking { authorization.verify()?.listItems(user)?.toList() }
             ?: return HttpLambdaResponse(
                 400,
                 mapOf("Content-Type" to "application/json"),

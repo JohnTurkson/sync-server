@@ -6,9 +6,10 @@ import com.johnturkson.aws.lambda.handler.events.HttpLambdaRequest
 import com.johnturkson.aws.lambda.handler.events.HttpLambdaResponse
 import com.johnturkson.sync.common.requests.GetItemRequest
 import com.johnturkson.sync.common.responses.GetItemResponse
+import com.johnturkson.sync.handlers.operations.getItem
+import com.johnturkson.sync.handlers.operations.verify
 import com.johnturkson.sync.handlers.resources.Resources.Serializer
-import com.johnturkson.sync.handlers.utilities.getItem
-import com.johnturkson.sync.handlers.utilities.verify
+import kotlinx.coroutines.runBlocking
 
 class GetItemFunction : HttpLambdaFunction<GetItemRequest, GetItemResponse> {
     override val serializer = Serializer
@@ -21,8 +22,7 @@ class GetItemFunction : HttpLambdaFunction<GetItemRequest, GetItemResponse> {
     ): HttpLambdaResponse<GetItemResponse> {
         val authorization = request.body.authorization
         val id = request.body.id
-        
-        val item = authorization.verify()?.getItem(id)
+        val item = runBlocking { authorization.verify()?.getItem(id) }
             ?: return HttpLambdaResponse(
                 400,
                 mapOf("Content-Type" to "application/json"),

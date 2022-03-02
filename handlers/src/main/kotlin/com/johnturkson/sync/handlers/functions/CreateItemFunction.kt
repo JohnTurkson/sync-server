@@ -9,9 +9,10 @@ import com.johnturkson.sync.common.data.ItemMetadata
 import com.johnturkson.sync.common.requests.CreateItemRequest
 import com.johnturkson.sync.common.responses.CreateItemResponse
 import com.johnturkson.sync.handlers.resources.Resources.Serializer
-import com.johnturkson.sync.handlers.utilities.createItem
-import com.johnturkson.sync.handlers.utilities.generateResourceId
-import com.johnturkson.sync.handlers.utilities.verify
+import com.johnturkson.sync.handlers.operations.createItem
+import com.johnturkson.sync.handlers.operations.generateResourceId
+import com.johnturkson.sync.handlers.operations.verify
+import kotlinx.coroutines.runBlocking
 
 class CreateItemFunction : HttpLambdaFunction<CreateItemRequest, CreateItemResponse> {
     override val serializer = Serializer
@@ -23,13 +24,12 @@ class CreateItemFunction : HttpLambdaFunction<CreateItemRequest, CreateItemRespo
         context: Context,
     ): HttpLambdaResponse<CreateItemResponse> {
         val authorization = request.body.authorization
-        
         val id = generateResourceId()
         val metadata = ItemMetadata(id, authorization.user)
         val data = request.body.data
         val item = Item(metadata, data)
         
-        authorization.verify()?.createItem(item)
+        runBlocking { authorization.verify()?.createItem(item) }
             ?: return HttpLambdaResponse(
                 400,
                 mapOf("Content-Type" to "application/json"),

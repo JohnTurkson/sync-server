@@ -10,8 +10,8 @@ import kotlinx.serialization.Serializable
 @ResourceMetadata
 data class ItemMetadata(
     @PrimaryPartitionKey
-    @SecondarySortKey("SyncItemsUserIndex")
+    @SecondarySortKey(indexName = "SyncItemsUserIndex", indexAlias = "ItemsUserIndex")
     val id: String,
-    @SecondaryPartitionKey("SyncItemsUserIndex")
+    @SecondaryPartitionKey(indexName = "SyncItemsUserIndex", indexAlias = "ItemsUserIndex")
     val user: String
 )

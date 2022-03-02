@@ -8,14 +8,19 @@ import com.johnturkson.sync.common.data.Authorization
 import com.johnturkson.sync.common.data.User
 import com.johnturkson.sync.common.data.UserCredentials
 import com.johnturkson.sync.common.data.UserMetadata
+import com.johnturkson.sync.common.generated.AuthorizationObject.Authorization
+import com.johnturkson.sync.common.generated.UserCredentialsObject.UserCredentials
+import com.johnturkson.sync.common.generated.UserObject.Users
 import com.johnturkson.sync.common.requests.CreateUserRequest
 import com.johnturkson.sync.common.responses.CreateUserResponse
+import com.johnturkson.sync.handlers.operations.generateAuthorizationToken
+import com.johnturkson.sync.handlers.operations.generateResourceId
+import com.johnturkson.sync.handlers.operations.hashPassword
 import com.johnturkson.sync.handlers.resources.Resources
-import com.johnturkson.sync.handlers.utilities.generateAuthorizationToken
-import com.johnturkson.sync.handlers.utilities.generateResourceId
-import com.johnturkson.sync.handlers.utilities.hashPassword
+import kotlinx.coroutines.future.await
+import kotlinx.coroutines.runBlocking
 import software.amazon.awssdk.enhanced.dynamodb.Expression
-import software.amazon.awssdk.enhanced.dynamodb.model.PutItemEnhancedRequest
+import software.amazon.awssdk.enhanced.dynamodb.model.TransactPutItemEnhancedRequest
 
 class CreateUserFunction : HttpLambdaFunction<CreateUserRequest, CreateUserResponse> {
     override val serializer = Resources.Serializer
@@ -34,30 +39,32 @@ class CreateUserFunction : HttpLambdaFunction<CreateUserRequest, CreateUserRespo
         val token = generateAuthorizationToken()
         val authorization = Authorization(token, user.metadata.id)
         
-        Resources.DynamoDbClient.transactWriteItems { transaction ->
-            val userExistsCondition = Expression.builder()
-                .expression("attribute_not_exists(#email)")
-                .expressionNames(mapOf("#email" to "email"))
-                .build()
-            
-            transaction.addPutItem(
-                Resources.UsersTable,
-                PutItemEnhancedRequest.builder(User::class.java)
-                    .item(user)
-                    .conditionExpression(userExistsCondition)
+        runBlocking {
+            Resources.DynamoDbClient.transactWriteItems { transaction ->
+                val userExistsCondition = Expression.builder()
+                    .expression("attribute_not_exists(#email)")
+                    .expressionNames(mapOf("#email" to "email"))
                     .build()
-            )
-            
-            transaction.addPutItem(
-                Resources.UserCredentialsTable,
-                PutItemEnhancedRequest.builder(UserCredentials::class.java)
-                    .item(userCredentials)
-                    .conditionExpression(userExistsCondition)
-                    .build()
-            )
-            
-            transaction.addPutItem(Resources.AuthorizationTable, authorization)
-        }.join()
+                
+                transaction.addPutItem(
+                    Resources.DynamoDbClient.Users,
+                    TransactPutItemEnhancedRequest.builder(User::class.java)
+                        .item(user)
+                        .conditionExpression(userExistsCondition)
+                        .build()
+                )
+                
+                transaction.addPutItem(
+                    Resources.DynamoDbClient.UserCredentials,
+                    TransactPutItemEnhancedRequest.builder(UserCredentials::class.java)
+                        .item(userCredentials)
+                        .conditionExpression(userExistsCondition)
+                        .build()
+                )
+                
+                transaction.addPutItem(Resources.DynamoDbClient.Authorization, authorization)
+            }.await()
+        }
         
         return HttpLambdaResponse(
             200,

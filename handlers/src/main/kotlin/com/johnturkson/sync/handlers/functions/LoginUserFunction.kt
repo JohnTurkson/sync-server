@@ -7,7 +7,8 @@ import com.johnturkson.aws.lambda.handler.events.HttpLambdaResponse
 import com.johnturkson.sync.common.requests.LoginUserRequest
 import com.johnturkson.sync.common.responses.LoginUserResponse
 import com.johnturkson.sync.handlers.resources.Resources
-import com.johnturkson.sync.handlers.utilities.verify
+import com.johnturkson.sync.handlers.operations.verify
+import kotlinx.coroutines.runBlocking
 
 class LoginUserFunction : HttpLambdaFunction<LoginUserRequest, LoginUserResponse> {
     override val serializer = Resources.Serializer
@@ -19,8 +20,7 @@ class LoginUserFunction : HttpLambdaFunction<LoginUserRequest, LoginUserResponse
         context: Context,
     ): HttpLambdaResponse<LoginUserResponse> {
         val credentials = request.body.credentials
-        
-        val authorization = credentials.verify()?.authorization
+        val authorization = runBlocking { credentials.verify()?.authorization }
             ?: return HttpLambdaResponse(
                 400,
                 mapOf("Content-Type" to "application/json"),
