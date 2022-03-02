@@ -7,11 +7,11 @@ import com.johnturkson.sync.generators.annotations.SecondarySortKey
 import kotlinx.serialization.Serializable
 
 @Serializable
-@Resource
+@Resource(tableName = "SyncAuthorization", tableAlias = "Authorization")
 data class Authorization(
     @PrimaryPartitionKey
-    @SecondarySortKey("SyncAuthorizationUserIndex")
+    @SecondarySortKey(indexName = "SyncAuthorizationUserIndex", indexAlias = "AuthorizationUserIndex")
     val token: String,
-    @SecondaryPartitionKey("SyncAuthorizationUserIndex")
+    @SecondaryPartitionKey(indexName = "SyncAuthorizationUserIndex", indexAlias = "AuthorizationUserIndex")
     val user: String,
 )

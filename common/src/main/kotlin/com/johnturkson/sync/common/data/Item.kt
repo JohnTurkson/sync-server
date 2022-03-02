@@ -5,7 +5,7 @@ import com.johnturkson.sync.generators.annotations.Resource
 import kotlinx.serialization.Serializable
 
 @Serializable
-@Resource
+@Resource(tableName = "SyncItems", tableAlias = "Items")
 data class Item(
     @Flatten
     val metadata: ItemMetadata,
