@@ -1,7 +1,7 @@
 plugins {
-    kotlin("jvm") version "1.5.30"
-    kotlin("plugin.serialization") version "1.5.30"
-    id("com.google.devtools.ksp") version "1.5.30-1.0.0-beta09"
+    kotlin("jvm") version "1.6.10"
+    kotlin("plugin.serialization") version "1.6.10"
+    id("com.google.devtools.ksp") version "1.6.10-1.0.4"
 }
 
 group = "com.johnturkson.sync"

@@ -13,14 +13,16 @@ repositories {
 
 dependencies {
     implementation(project(":common"))
-    implementation(kotlin("stdlib"))
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.6.10")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.6.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
     implementation("com.johnturkson.aws:aws-lambda-handler:0.0.6")
     implementation("com.johnturkson.security:security-tools:0.0.5")
     implementation("com.johnturkson.text:text-tools:0.0.2")
     implementation("org.springframework.security:spring-security-crypto:5.5.2")
-    implementation(platform("software.amazon.awssdk:bom:2.17.34"))
-    implementation("software.amazon.awssdk:aws-crt-client:2.17.34-PREVIEW")
+    implementation(platform("software.amazon.awssdk:bom:2.17.122"))
+    implementation("software.amazon.awssdk:aws-crt-client:2.17.122-PREVIEW")
     implementation("software.amazon.awssdk:dynamodb-enhanced") {
         exclude(group = "software.amazon.awssdk", module = "apache-client")
         exclude(group = "software.amazon.awssdk", module = "netty-nio-client")
