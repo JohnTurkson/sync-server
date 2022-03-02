@@ -14,6 +14,8 @@ repositories {
 dependencies {
     implementation(project(":common"))
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.6.10")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.6.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
     implementation("com.johnturkson.aws:aws-lambda-handler:0.0.6")
     implementation("com.johnturkson.security:security-tools:0.0.5")
