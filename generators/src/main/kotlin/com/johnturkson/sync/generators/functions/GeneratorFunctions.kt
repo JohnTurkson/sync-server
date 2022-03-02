@@ -107,7 +107,7 @@ fun generateSchemaObject(resourceClass: KSClassDeclaration, codeGenerator: CodeG
         "import software.amazon.awssdk.enhanced.dynamodb.mapper.StaticImmutableTableSchema"
     )
     
-    val tableIndices = mutableSetOf<String>()
+    val tableIndices = mutableSetOf<Pair<String, String>>()
     
     val schemaProperties = resourceProperties.map { property ->
         val name = property.simpleName.asString()
@@ -129,20 +129,24 @@ fun generateSchemaObject(resourceClass: KSClassDeclaration, codeGenerator: CodeG
                 }
                 SecondaryPartitionKey::class.qualifiedName -> {
                     imports += "import software.amazon.awssdk.enhanced.dynamodb.mapper.StaticAttributeTags"
-                    val index = annotation.first().arguments.first().value.toString()
-                    tags += "StaticAttributeTags.secondaryPartitionKey(\"$index\")"
-                    tableIndices += index
+                    val (indexName, indexAlias) = annotation.first().arguments.map { argument -> argument.value.toString() }
+                    tags += "StaticAttributeTags.secondaryPartitionKey(\"$indexName\")"
+                    tableIndices += indexName to indexAlias
                 }
                 SecondarySortKey::class.qualifiedName -> {
                     imports += "import software.amazon.awssdk.enhanced.dynamodb.mapper.StaticAttributeTags"
-                    val index = annotation.first().arguments.first().value.toString()
-                    tags += "StaticAttributeTags.secondarySortKey(\"$index\")"
-                    tableIndices += index
+                    val (indexName, indexAlias) = annotation.first().arguments.map { argument -> argument.value.toString() }
+                    tags += "StaticAttributeTags.secondarySortKey(\"$indexName\")"
+                    tableIndices += indexName to indexAlias
                 }
             }
         }
-        
-        tableIndices += findTableIndices(property)
+    
+        val indexAnnotations = setOf(
+            SecondaryPartitionKey::class.qualifiedName!!,
+            SecondarySortKey::class.qualifiedName!!,
+        )
+        tableIndices += findTableIndices(property, indexAnnotations)
         
         if (Flatten::class.qualifiedName in annotations) {
             ".flatten(${type}Object.SCHEMA, $resourceClassName::$name, $builderClassName::$name)"
@@ -175,7 +179,8 @@ fun generateSchemaObject(resourceClass: KSClassDeclaration, codeGenerator: CodeG
         
         if (Resource::class.qualifiedName in resourceAnnotations) {
             val resourceAnnotation = resourceAnnotations[Resource::class.qualifiedName]!!
-            val tableName = resourceAnnotation.first().arguments.first().value.toString()
+            val (tableName, tableAlias) = resourceAnnotation.first().arguments
+                .map { argument -> argument.value.toString() }
             
             imports += setOf(
                 "import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedAsyncClient",
@@ -187,10 +192,10 @@ fun generateSchemaObject(resourceClass: KSClassDeclaration, codeGenerator: CodeG
             val tableFields = """
                 |
                 |
-                |val DynamoDbEnhancedAsyncClient.$tableName: DynamoDbAsyncTable<$resourceClassName>
+                |val DynamoDbEnhancedAsyncClient.$tableAlias: DynamoDbAsyncTable<$resourceClassName>
                 |    get() = this.table("$tableName", SCHEMA)
                 |
-                |val DynamoDbEnhancedClient.$tableName: DynamoDbTable<$resourceClassName>
+                |val DynamoDbEnhancedClient.$tableAlias: DynamoDbTable<$resourceClassName>
                 |    get() = this.table("$tableName", SCHEMA)
             """.trimMargin()
             
@@ -203,15 +208,15 @@ fun generateSchemaObject(resourceClass: KSClassDeclaration, codeGenerator: CodeG
                 )
             }
             
-            tableIndices.forEach { indexName ->
+            tableIndices.forEach { (indexName, indexAlias) ->
                 val indexFields = """
                     |
                     |
-                    |val DynamoDbEnhancedAsyncClient.$indexName: DynamoDbAsyncIndex<$resourceClassName>
-                    |    get() = this.$tableName.index("$indexName")
+                    |val DynamoDbEnhancedAsyncClient.$indexAlias: DynamoDbAsyncIndex<$resourceClassName>
+                    |    get() = this.$tableAlias.index("$indexName")
                     |
-                    |val DynamoDbEnhancedClient.$indexName: DynamoDbIndex<$resourceClassName>
-                    |    get() = this.$tableName.index("$indexName")
+                    |val DynamoDbEnhancedClient.$indexAlias: DynamoDbIndex<$resourceClassName>
+                    |    get() = this.$tableAlias.index("$indexName")
                 """.trimMargin()
                 
                 append(indexFields)
@@ -233,13 +238,8 @@ fun generateSchemaObject(resourceClass: KSClassDeclaration, codeGenerator: CodeG
     generatedResourceBuilderFile.bufferedWriter().use { writer -> writer.write(generatedClass) }
 }
 
-fun findTableIndices(property: KSPropertyDeclaration): Set<String> {
-    val indices = mutableSetOf<String>()
-    
-    val targetAnnotations = setOf(
-        SecondaryPartitionKey::class.qualifiedName,
-        SecondarySortKey::class.qualifiedName,
-    )
+fun findTableIndices(property: KSPropertyDeclaration, targetAnnotations: Set<String>): Set<Pair<String, String>> {
+    val indices = mutableSetOf<Pair<String, String>>()
     
     val resourceProperties = property.type
         .resolve()
@@ -254,8 +254,9 @@ fun findTableIndices(property: KSPropertyDeclaration): Set<String> {
         
         annotations.forEach { (name, annotation) ->
             if (name in targetAnnotations) {
-                val index = annotation.first().arguments.first().value.toString()
-                indices += index
+                val (indexName, indexAlias) = annotation.first().arguments
+                    .map { argument -> argument.value.toString() }
+                indices += indexName to indexAlias
             }
         }
     }
