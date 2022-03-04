@@ -1,0 +1,8 @@
+{
+  "resources":{
+    "includes":[
+      {"pattern":".*/aws-lambda-runtime-interface-client.glibc.so$"},
+      {"pattern":".*/aws-lambda-runtime-interface-client.musl.so$"}
+    ]},
+  "bundles":[]
+}
