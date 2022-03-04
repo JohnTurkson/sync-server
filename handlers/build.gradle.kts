@@ -18,7 +18,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.6.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
     implementation("org.slf4j:slf4j-simple:1.7.36")
-    implementation("org.springframework.security:spring-security-crypto:5.5.2")
+    implementation("org.springframework.security:spring-security-crypto:5.6.2")
     implementation("com.amazonaws:aws-lambda-java-core:1.2.1")
     implementation("com.amazonaws:aws-lambda-java-events:3.11.0")
     implementation("com.amazonaws:aws-lambda-java-runtime-interface-client:2.1.0")
@@ -33,7 +33,7 @@ dependencies {
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(11))
-        vendor.set(JvmVendorSpec.AMAZON)
+        vendor.set(JvmVendorSpec.GRAAL_VM)
     }
 }
 

@@ -34,6 +34,6 @@ kotlin {
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(11))
-        vendor.set(JvmVendorSpec.AMAZON)
+        vendor.set(JvmVendorSpec.GRAAL_VM)
     }
 }
