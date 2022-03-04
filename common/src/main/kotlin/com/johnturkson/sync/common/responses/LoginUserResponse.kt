@@ -5,9 +5,11 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 sealed class LoginUserResponse {
-    @Serializable
-    data class Success(val authorization: Authorization) : LoginUserResponse()
+    abstract val statusCode: Int
     
     @Serializable
-    data class Failure(val error: String) : LoginUserResponse()
+    data class Success(val authorization: Authorization, override val statusCode: Int) : LoginUserResponse()
+    
+    @Serializable
+    data class Failure(val error: String, override val statusCode: Int) : LoginUserResponse()
 }

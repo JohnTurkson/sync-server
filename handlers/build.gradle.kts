@@ -9,6 +9,7 @@ version = "0.0.1"
 
 repositories {
     mavenCentral()
+    maven("https://packages.johnturkson.com/maven")
 }
 
 dependencies {
@@ -17,6 +18,8 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.6.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
+    implementation("com.johnturkson.security:security-tools:0.0.5")
+    implementation("com.johnturkson.text:text-tools:0.0.2")
     implementation("org.slf4j:slf4j-simple:1.7.36")
     implementation("org.springframework.security:spring-security-crypto:5.6.2")
     implementation("com.amazonaws:aws-lambda-java-core:1.2.1")

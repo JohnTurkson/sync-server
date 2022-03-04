@@ -11,10 +11,10 @@ import com.johnturkson.sync.common.generated.UserCredentialsObject.UserCredentia
 import com.johnturkson.sync.common.generated.UserObject.Users
 import com.johnturkson.sync.handlers.contexts.AuthorizedContext
 import com.johnturkson.sync.handlers.resources.Resources.DynamoDbClient
+import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.future.await
-import kotlinx.coroutines.runBlocking
 import software.amazon.awssdk.enhanced.dynamodb.Key
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional
 
@@ -27,8 +27,7 @@ suspend fun UserCredentials.verify(): AuthorizedContext? {
     val credentials = DynamoDbClient.UserCredentials.getItem(this).await() ?: return null
     val passwordMatches = this.password.comparePasswordToHash(credentials.password)
     if (!passwordMatches) return null
-    val token = generateAuthorizationToken()
-    val authorization = Authorization(token, credentials.user)
+    val authorization = Authorization(generateAuthorizationToken(), credentials.user)
     DynamoDbClient.Authorization.putItem(authorization).await()
     return AuthorizedContext(authorization)
 }
@@ -48,9 +47,9 @@ suspend fun AuthorizedContext.getItem(id: String): Item? {
 fun AuthorizedContext.listItems(user: String): Flow<Item>? {
     if (user != this.authorization.user) return null
     val key = Key.builder().partitionValue(user).build()
-    return flow {
+    return channelFlow {
         DynamoDbClient.ItemsUserIndex.query(QueryConditional.keyEqualTo(key))
-            .subscribe { page -> runBlocking { page.items().forEach { emit(it) } } }
+            .subscribe { page -> page.items().forEach { item -> trySendBlocking(item) } }
             .await()
     }
 }

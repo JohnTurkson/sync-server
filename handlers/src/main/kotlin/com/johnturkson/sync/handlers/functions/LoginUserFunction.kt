@@ -1,47 +1,40 @@
 package com.johnturkson.sync.handlers.functions
 
 import com.amazonaws.services.lambda.runtime.Context
-import com.johnturkson.aws.lambda.handler.HttpLambdaFunction
-import com.johnturkson.aws.lambda.handler.events.HttpLambdaRequest
-import com.johnturkson.aws.lambda.handler.events.HttpLambdaResponse
+import com.amazonaws.services.lambda.runtime.RequestHandler
+import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent
+import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPResponse
 import com.johnturkson.sync.common.requests.LoginUserRequest
 import com.johnturkson.sync.common.responses.LoginUserResponse
-import com.johnturkson.sync.handlers.resources.Resources
+import com.johnturkson.sync.common.responses.LoginUserResponse.Failure
 import com.johnturkson.sync.handlers.operations.verify
+import com.johnturkson.sync.handlers.resources.Resources.Serializer
 import kotlinx.coroutines.runBlocking
 
-class LoginUserFunction : HttpLambdaFunction<LoginUserRequest, LoginUserResponse> {
-    override val serializer = Resources.Serializer
-    override val decoder = HttpLambdaRequest.serializer(LoginUserRequest.serializer())
-    override val encoder = HttpLambdaResponse.serializer(LoginUserResponse.serializer())
-    
-    override fun process(
-        request: HttpLambdaRequest<LoginUserRequest>,
-        context: Context,
-    ): HttpLambdaResponse<LoginUserResponse> {
-        val credentials = request.body.credentials
-        val authorization = runBlocking { credentials.verify()?.authorization }
-            ?: return HttpLambdaResponse(
-                400,
-                mapOf("Content-Type" to "application/json"),
-                false,
-                LoginUserResponse.Failure("Invalid User")
-            )
-        
-        return HttpLambdaResponse(
-            200,
-            mapOf("Content-Type" to "application/json"),
-            false,
-            LoginUserResponse.Success(authorization)
-        )
+class LoginUserFunction :
+    RequestHandler<APIGatewayV2HTTPEvent, APIGatewayV2HTTPResponse>,
+    LambdaHandler<LoginUserRequest, LoginUserResponse> {
+    override fun handleRequest(input: APIGatewayV2HTTPEvent, context: Context): APIGatewayV2HTTPResponse {
+        val response = runBlocking { processRequest(input.body) }
+        return APIGatewayV2HTTPResponse.builder()
+            .withStatusCode(response.statusCode)
+            .withHeaders(mapOf("Content-Type" to "application/json"))
+            .withBody(encodeResponse(response))
+            .build()
     }
     
-    override fun onFailure(exception: Throwable, context: Context): HttpLambdaResponse<LoginUserResponse> {
-        return HttpLambdaResponse(
-            400,
-            mapOf("Content-Type" to "application/json"),
-            false,
-            LoginUserResponse.Failure(exception.stackTraceToString())
-        )
+    override suspend fun processRequest(body: String): LoginUserResponse {
+        val request = decodeRequest(body) ?: return Failure("Invalid Request", 400)
+        val authorization = request.credentials.verify()?.authorization ?: return Failure("Invalid Authorization", 401)
+        return LoginUserResponse.Success(authorization, 200)
     }
+    
+    override fun decodeRequest(body: String): LoginUserRequest? {
+        return runCatching { Serializer.decodeFromString(LoginUserRequest.serializer(), body) }.getOrNull()
+    }
+    
+    override fun encodeResponse(response: LoginUserResponse): String {
+        return Serializer.encodeToString(LoginUserResponse.serializer(), response)
+    }
+    
 }

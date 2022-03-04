@@ -1,50 +1,43 @@
 package com.johnturkson.sync.handlers.functions
 
 import com.amazonaws.services.lambda.runtime.Context
-import com.johnturkson.aws.lambda.handler.HttpLambdaFunction
-import com.johnturkson.aws.lambda.handler.events.HttpLambdaRequest
-import com.johnturkson.aws.lambda.handler.events.HttpLambdaResponse
+import com.amazonaws.services.lambda.runtime.RequestHandler
+import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent
+import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPResponse
 import com.johnturkson.sync.common.requests.ListItemsRequest
 import com.johnturkson.sync.common.responses.ListItemsResponse
+import com.johnturkson.sync.common.responses.ListItemsResponse.Failure
+import com.johnturkson.sync.common.responses.ListItemsResponse.Success
 import com.johnturkson.sync.handlers.operations.listItems
 import com.johnturkson.sync.handlers.operations.verify
-import com.johnturkson.sync.handlers.resources.Resources
+import com.johnturkson.sync.handlers.resources.Resources.Serializer
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 
-class ListItemsFunction : HttpLambdaFunction<ListItemsRequest, ListItemsResponse> {
-    override val serializer = Resources.Serializer
-    override val decoder = HttpLambdaRequest.serializer(ListItemsRequest.serializer())
-    override val encoder = HttpLambdaResponse.serializer(ListItemsResponse.serializer())
-    
-    override fun process(
-        request: HttpLambdaRequest<ListItemsRequest>,
-        context: Context,
-    ): HttpLambdaResponse<ListItemsResponse> {
-        val authorization = request.body.authorization
-        val user = request.body.user
-        val items = runBlocking { authorization.verify()?.listItems(user)?.toList() }
-            ?: return HttpLambdaResponse(
-                400,
-                mapOf("Content-Type" to "application/json"),
-                false,
-                ListItemsResponse.Failure("Invalid Authorization")
-            )
-        
-        return HttpLambdaResponse(
-            200,
-            mapOf("Content-Type" to "application/json"),
-            false,
-            ListItemsResponse.Success(items)
-        )
+class ListItemsFunction :
+    RequestHandler<APIGatewayV2HTTPEvent, APIGatewayV2HTTPResponse>,
+    LambdaHandler<ListItemsRequest, ListItemsResponse> {
+    override fun handleRequest(input: APIGatewayV2HTTPEvent, context: Context): APIGatewayV2HTTPResponse {
+        val response = runBlocking { processRequest(input.body) }
+        return APIGatewayV2HTTPResponse.builder()
+            .withStatusCode(response.statusCode)
+            .withHeaders(mapOf("Content-Type" to "application/json"))
+            .withBody(encodeResponse(response))
+            .build()
     }
     
-    override fun onFailure(exception: Throwable, context: Context): HttpLambdaResponse<ListItemsResponse> {
-        return HttpLambdaResponse(
-            400,
-            mapOf("Content-Type" to "application/json"),
-            false,
-            ListItemsResponse.Failure(exception.stackTraceToString())
-        )
+    override suspend fun processRequest(body: String): ListItemsResponse {
+        val request = decodeRequest(body) ?: return Failure("Invalid Request", 400)
+        val authorization = request.authorization.verify() ?: return Failure("Invalid Authorization", 401)
+        val items = authorization.listItems(request.user)?.toList().orEmpty()
+        return Success(items, 200)
+    }
+    
+    override fun decodeRequest(body: String): ListItemsRequest? {
+        return runCatching { Serializer.decodeFromString(ListItemsRequest.serializer(), body) }.getOrNull()
+    }
+    
+    override fun encodeResponse(response: ListItemsResponse): String {
+        return Serializer.encodeToString(ListItemsResponse.serializer(), response)
     }
 }
