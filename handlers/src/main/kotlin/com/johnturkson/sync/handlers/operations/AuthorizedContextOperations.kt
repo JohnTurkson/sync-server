@@ -2,13 +2,12 @@ package com.johnturkson.sync.handlers.operations
 
 import com.johnturkson.sync.common.data.Authorization
 import com.johnturkson.sync.common.data.Item
-import com.johnturkson.sync.common.data.User
 import com.johnturkson.sync.common.data.UserCredentials
 import com.johnturkson.sync.common.generated.AuthorizationObject.Authorization
 import com.johnturkson.sync.common.generated.ItemObject.Items
 import com.johnturkson.sync.common.generated.ItemObject.ItemsUserIndex
 import com.johnturkson.sync.common.generated.UserCredentialsObject.UserCredentials
-import com.johnturkson.sync.common.generated.UserObject.Users
+import com.johnturkson.sync.common.generated.UserEmailObject.UserEmails
 import com.johnturkson.sync.handlers.contexts.AuthorizedContext
 import com.johnturkson.sync.handlers.resources.Resources.DynamoDbClient
 import kotlinx.coroutines.channels.trySendBlocking
@@ -20,22 +19,19 @@ import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional
 
 suspend fun Authorization.verify(): AuthorizedContext? {
     val authorization = DynamoDbClient.Authorization.getItem(this).await() ?: return null
-    return if (authorization == this) AuthorizedContext(authorization) else null
+    val authorizedContext = AuthorizedContext(authorization)
+    return if (authorization == this) authorizedContext else null
 }
 
 suspend fun UserCredentials.verify(): AuthorizedContext? {
     val credentials = DynamoDbClient.UserCredentials.getItem(this).await() ?: return null
     val passwordMatches = this.password.comparePasswordToHash(credentials.password)
     if (!passwordMatches) return null
-    val authorization = Authorization(generateAuthorizationToken(), credentials.user)
+    val key = Key.builder().partitionValue(credentials.email).build()
+    val userEmail = DynamoDbClient.UserEmails.getItem(key).await() ?: return null
+    val authorization = Authorization(generateAuthorizationToken(), userEmail.user)
     DynamoDbClient.Authorization.putItem(authorization).await()
     return AuthorizedContext(authorization)
-}
-
-suspend fun AuthorizedContext.getUser(id: String): User? {
-    val key = Key.builder().partitionValue(id).build()
-    val user = DynamoDbClient.Users.getItem(key).await() ?: return null
-    return if (user.metadata.id == this.authorization.user) user else null
 }
 
 suspend fun AuthorizedContext.getItem(id: String): Item? {
