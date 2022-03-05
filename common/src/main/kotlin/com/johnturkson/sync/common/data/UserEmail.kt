@@ -5,9 +5,9 @@ import com.johnturkson.sync.generators.annotations.Resource
 import kotlinx.serialization.Serializable
 
 @Serializable
-@Resource(tableName = "SyncUserCredentials", tableAlias = "UserCredentials")
-data class UserCredentials(
+@Resource(tableName = "SyncUserEmails", tableAlias = "UserEmails")
+data class UserEmail(
     @PrimaryPartitionKey
     val email: String,
-    val password: String,
+    val user: String,
 )
