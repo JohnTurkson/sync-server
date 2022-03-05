@@ -7,14 +7,17 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPResponse
 import com.johnturkson.sync.common.data.Authorization
 import com.johnturkson.sync.common.data.User
 import com.johnturkson.sync.common.data.UserCredentials
+import com.johnturkson.sync.common.data.UserEmail
 import com.johnturkson.sync.common.data.UserMetadata
 import com.johnturkson.sync.common.generated.AuthorizationObject.Authorization
 import com.johnturkson.sync.common.generated.UserCredentialsObject.UserCredentials
+import com.johnturkson.sync.common.generated.UserEmailObject.UserEmails
 import com.johnturkson.sync.common.generated.UserObject.Users
 import com.johnturkson.sync.common.requests.CreateUserRequest
 import com.johnturkson.sync.common.responses.CreateUserResponse
 import com.johnturkson.sync.common.responses.CreateUserResponse.Failure
 import com.johnturkson.sync.common.responses.CreateUserResponse.Success
+import com.johnturkson.sync.handlers.definitions.LambdaHandler
 import com.johnturkson.sync.handlers.operations.generateAuthorizationToken
 import com.johnturkson.sync.handlers.operations.generateResourceId
 import com.johnturkson.sync.handlers.operations.hashPassword
@@ -37,40 +40,38 @@ class CreateUserFunction :
             .build()
     }
     
-    override suspend fun processRequest(body: String): CreateUserResponse {
+    override suspend fun processRequest(body: String?): CreateUserResponse {
         val request = decodeRequest(body) ?: return Failure("Invalid Request", 400)
-        val user = User(UserMetadata(generateResourceId()))
+        val user = User(UserMetadata(generateResourceId(), request.email))
+        val userEmail = UserEmail(user.metadata.email, user.metadata.id)
         val userCredentials = UserCredentials(user.metadata.id, request.password.hashPassword())
         val authorization = Authorization(generateAuthorizationToken(), user.metadata.id)
+        
         Resources.DynamoDbClient.transactWriteItems { transaction ->
-            val userExistsCondition = Expression.builder()
+            val emailExistsCondition = Expression.builder()
                 .expression("attribute_not_exists(#email)")
                 .expressionNames(mapOf("#email" to "email"))
                 .build()
             
             transaction.addPutItem(
-                Resources.DynamoDbClient.Users,
-                PutItemEnhancedRequest.builder(User::class.java)
-                    .item(user)
-                    .conditionExpression(userExistsCondition)
+                Resources.DynamoDbClient.UserEmails,
+                PutItemEnhancedRequest.builder(UserEmail::class.java)
+                    .item(userEmail)
+                    .conditionExpression(emailExistsCondition)
                     .build()
             )
-            
-            transaction.addPutItem(
-                Resources.DynamoDbClient.UserCredentials,
-                PutItemEnhancedRequest.builder(UserCredentials::class.java)
-                    .item(userCredentials)
-                    .conditionExpression(userExistsCondition)
-                    .build()
-            )
-            
+            transaction.addPutItem(Resources.DynamoDbClient.Users, user)
+            transaction.addPutItem(Resources.DynamoDbClient.UserCredentials, userCredentials)
             transaction.addPutItem(Resources.DynamoDbClient.Authorization, authorization)
         }.await()
+        
         return Success(user, authorization, 200)
     }
     
-    override fun decodeRequest(body: String): CreateUserRequest? {
-        return runCatching { Serializer.decodeFromString(CreateUserRequest.serializer(), body) }.getOrNull()
+    override fun decodeRequest(body: String?): CreateUserRequest? {
+        return runCatching {
+            body?.let { data -> Serializer.decodeFromString(CreateUserRequest.serializer(), data) }
+        }.getOrNull()
     }
     
     override fun encodeResponse(response: CreateUserResponse): String {

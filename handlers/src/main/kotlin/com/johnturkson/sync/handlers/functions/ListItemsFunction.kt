@@ -8,6 +8,7 @@ import com.johnturkson.sync.common.requests.ListItemsRequest
 import com.johnturkson.sync.common.responses.ListItemsResponse
 import com.johnturkson.sync.common.responses.ListItemsResponse.Failure
 import com.johnturkson.sync.common.responses.ListItemsResponse.Success
+import com.johnturkson.sync.handlers.definitions.LambdaHandler
 import com.johnturkson.sync.handlers.operations.listItems
 import com.johnturkson.sync.handlers.operations.verify
 import com.johnturkson.sync.handlers.resources.Resources.Serializer
@@ -26,15 +27,17 @@ class ListItemsFunction :
             .build()
     }
     
-    override suspend fun processRequest(body: String): ListItemsResponse {
+    override suspend fun processRequest(body: String?): ListItemsResponse {
         val request = decodeRequest(body) ?: return Failure("Invalid Request", 400)
         val authorization = request.authorization.verify() ?: return Failure("Invalid Authorization", 401)
         val items = authorization.listItems(request.user)?.toList().orEmpty()
         return Success(items, 200)
     }
     
-    override fun decodeRequest(body: String): ListItemsRequest? {
-        return runCatching { Serializer.decodeFromString(ListItemsRequest.serializer(), body) }.getOrNull()
+    override fun decodeRequest(body: String?): ListItemsRequest? {
+        return runCatching {
+            body?.let { data -> Serializer.decodeFromString(ListItemsRequest.serializer(), data) }
+        }.getOrNull()
     }
     
     override fun encodeResponse(response: ListItemsResponse): String {

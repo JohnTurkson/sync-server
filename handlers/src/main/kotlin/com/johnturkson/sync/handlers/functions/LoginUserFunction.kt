@@ -7,6 +7,7 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPResponse
 import com.johnturkson.sync.common.requests.LoginUserRequest
 import com.johnturkson.sync.common.responses.LoginUserResponse
 import com.johnturkson.sync.common.responses.LoginUserResponse.Failure
+import com.johnturkson.sync.handlers.definitions.LambdaHandler
 import com.johnturkson.sync.handlers.operations.verify
 import com.johnturkson.sync.handlers.resources.Resources.Serializer
 import kotlinx.coroutines.runBlocking
@@ -23,14 +24,16 @@ class LoginUserFunction :
             .build()
     }
     
-    override suspend fun processRequest(body: String): LoginUserResponse {
+    override suspend fun processRequest(body: String?): LoginUserResponse {
         val request = decodeRequest(body) ?: return Failure("Invalid Request", 400)
         val authorization = request.credentials.verify()?.authorization ?: return Failure("Invalid Authorization", 401)
         return LoginUserResponse.Success(authorization, 200)
     }
     
-    override fun decodeRequest(body: String): LoginUserRequest? {
-        return runCatching { Serializer.decodeFromString(LoginUserRequest.serializer(), body) }.getOrNull()
+    override fun decodeRequest(body: String?): LoginUserRequest? {
+        return runCatching {
+            body?.let { data -> Serializer.decodeFromString(LoginUserRequest.serializer(), data) }
+        }.getOrNull()
     }
     
     override fun encodeResponse(response: LoginUserResponse): String {

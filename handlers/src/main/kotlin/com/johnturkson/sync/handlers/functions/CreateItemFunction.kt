@@ -10,10 +10,10 @@ import com.johnturkson.sync.common.requests.CreateItemRequest
 import com.johnturkson.sync.common.responses.CreateItemResponse
 import com.johnturkson.sync.common.responses.CreateItemResponse.Failure
 import com.johnturkson.sync.common.responses.CreateItemResponse.Success
+import com.johnturkson.sync.handlers.definitions.LambdaHandler
 import com.johnturkson.sync.handlers.operations.createItem
 import com.johnturkson.sync.handlers.operations.generateResourceId
 import com.johnturkson.sync.handlers.operations.verify
-import com.johnturkson.sync.handlers.resources.Resources
 import com.johnturkson.sync.handlers.resources.Resources.Serializer
 import kotlinx.coroutines.runBlocking
 
@@ -29,7 +29,7 @@ class CreateItemFunction :
             .build()
     }
     
-    override suspend fun processRequest(body: String): CreateItemResponse {
+    override suspend fun processRequest(body: String?): CreateItemResponse {
         val request = decodeRequest(body) ?: return Failure("Invalid Request", 400)
         val authorization = request.authorization.verify() ?: return Failure("Invalid Authorization", 401)
         val metadata = ItemMetadata(generateResourceId(), request.authorization.user)
@@ -40,8 +40,10 @@ class CreateItemFunction :
         }
     }
     
-    override fun decodeRequest(body: String): CreateItemRequest? {
-        return runCatching { Serializer.decodeFromString(CreateItemRequest.serializer(), body) }.getOrNull()
+    override fun decodeRequest(body: String?): CreateItemRequest? {
+        return runCatching {
+            body?.let { data -> Serializer.decodeFromString(CreateItemRequest.serializer(), data) }
+        }.getOrNull()
     }
     
     override fun encodeResponse(response: CreateItemResponse): String {

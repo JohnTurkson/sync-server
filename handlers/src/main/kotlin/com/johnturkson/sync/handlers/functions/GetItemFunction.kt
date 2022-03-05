@@ -8,6 +8,7 @@ import com.johnturkson.sync.common.requests.GetItemRequest
 import com.johnturkson.sync.common.responses.GetItemResponse
 import com.johnturkson.sync.common.responses.GetItemResponse.Failure
 import com.johnturkson.sync.common.responses.GetItemResponse.Success
+import com.johnturkson.sync.handlers.definitions.LambdaHandler
 import com.johnturkson.sync.handlers.operations.getItem
 import com.johnturkson.sync.handlers.operations.verify
 import com.johnturkson.sync.handlers.resources.Resources.Serializer
@@ -25,7 +26,7 @@ class GetItemFunction :
             .build()
     }
     
-    override suspend fun processRequest(body: String): GetItemResponse {
+    override suspend fun processRequest(body: String?): GetItemResponse {
         val request = decodeRequest(body) ?: return Failure("Invalid Request", 400)
         val authorization = request.authorization.verify() ?: return Failure("Invalid Authorization", 401)
         return when (val item = authorization.getItem(request.id)) {
@@ -34,8 +35,10 @@ class GetItemFunction :
         }
     }
     
-    override fun decodeRequest(body: String): GetItemRequest? {
-        return runCatching { Serializer.decodeFromString(GetItemRequest.serializer(), body) }.getOrNull()
+    override fun decodeRequest(body: String?): GetItemRequest? {
+        return runCatching {
+            body?.let { data -> Serializer.decodeFromString(GetItemRequest.serializer(), data) }
+        }.getOrNull()
     }
     
     override fun encodeResponse(response: GetItemResponse): String {
