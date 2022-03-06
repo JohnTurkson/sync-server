@@ -10,4 +10,5 @@ version = "0.0.1"
 
 repositories {
     mavenCentral()
+    maven("https://packages.johnturkson.com/maven")
 }

@@ -9,6 +9,7 @@ version = "0.0.1"
 
 repositories {
     mavenCentral()
+    maven("https://packages.johnturkson.com/maven")
 }
 
 dependencies {
@@ -18,8 +19,8 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
     implementation(platform("software.amazon.awssdk:bom:2.16.104"))
     implementation("software.amazon.awssdk:dynamodb-enhanced") {
-        exclude(group = "software.amazon.awssdk", module = "apache-client")
-        exclude(group = "software.amazon.awssdk", module = "netty-nio-client")
+        exclude("software.amazon.awssdk", "apache-client")
+        exclude("software.amazon.awssdk", "netty-nio-client")
     }
 }
 
