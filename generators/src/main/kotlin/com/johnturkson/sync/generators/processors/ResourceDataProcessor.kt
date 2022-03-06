@@ -21,8 +21,8 @@ class ResourceDataProcessor(
             .filterIsInstance<KSClassDeclaration>()
         
         resourceDataClasses.forEach { resourceClass ->
-            generateBuilderClass(resourceClass, codeGenerator)
-            generateSchemaObject(resourceClass, codeGenerator)
+            generateBuilderClass(resourceClass, codeGenerator, options)
+            generateSchemaObject(resourceClass, codeGenerator, options)
         }
         
         return emptyList()

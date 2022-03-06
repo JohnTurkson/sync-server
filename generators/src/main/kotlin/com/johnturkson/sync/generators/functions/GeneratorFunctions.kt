@@ -13,10 +13,14 @@ import com.johnturkson.sync.generators.annotations.Resource
 import com.johnturkson.sync.generators.annotations.SecondaryPartitionKey
 import com.johnturkson.sync.generators.annotations.SecondarySortKey
 
-fun generateBuilderClass(resourceClass: KSClassDeclaration, codeGenerator: CodeGenerator) {
+fun generateBuilderClass(
+    resourceClass: KSClassDeclaration,
+    codeGenerator: CodeGenerator,
+    options: Map<String, String>,
+) {
     val resourceProperties = resourceClass.getDeclaredProperties()
     val resourceClassName = resourceClass.simpleName.asString()
-    val generatedPackageName = "com.johnturkson.sync.common.generated"
+    val generatedPackageName = requireNotNull(options["location"])
     val generatedClassName = "${resourceClassName}Builder"
     
     val generatedResourceBuilderFile = codeGenerator.createNewFile(
@@ -84,14 +88,18 @@ fun generateBuilderClass(resourceClass: KSClassDeclaration, codeGenerator: CodeG
     generatedResourceBuilderFile.bufferedWriter().use { writer -> writer.write(generatedClass) }
 }
 
-fun generateSchemaObject(resourceClass: KSClassDeclaration, codeGenerator: CodeGenerator) {
+fun generateSchemaObject(
+    resourceClass: KSClassDeclaration,
+    codeGenerator: CodeGenerator,
+    options: Map<String, String>,
+) {
     val resourceAnnotations = resourceClass.annotations.groupBy { annotation ->
         annotation.annotationType.resolve().declaration.qualifiedName?.asString()
     }
     val resourceProperties = resourceClass.getDeclaredProperties()
     val resourceClassName = resourceClass.simpleName.asString()
     val builderClassName = "${resourceClassName}Builder"
-    val generatedPackageName = "com.johnturkson.sync.common.generated"
+    val generatedPackageName = requireNotNull(options["location"])
     val generatedClassName = "${resourceClassName}Object"
     
     val generatedResourceBuilderFile = codeGenerator.createNewFile(
@@ -141,7 +149,7 @@ fun generateSchemaObject(resourceClass: KSClassDeclaration, codeGenerator: CodeG
                 }
             }
         }
-    
+        
         val indexAnnotations = setOf(
             SecondaryPartitionKey::class.qualifiedName!!,
             SecondarySortKey::class.qualifiedName!!,

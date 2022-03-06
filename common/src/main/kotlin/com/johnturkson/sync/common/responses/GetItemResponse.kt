@@ -5,9 +5,11 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 sealed class GetItemResponse {
-    @Serializable
-    data class Success(val item: Item) : GetItemResponse()
+    abstract val statusCode: Int
     
     @Serializable
-    data class Failure(val error: String) : GetItemResponse()
+    data class Success(val item: Item, override val statusCode: Int) : GetItemResponse()
+    
+    @Serializable
+    data class Failure(val error: String, override val statusCode: Int) : GetItemResponse()
 }

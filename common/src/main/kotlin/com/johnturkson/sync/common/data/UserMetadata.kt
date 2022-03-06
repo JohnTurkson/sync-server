@@ -9,4 +9,5 @@ import kotlinx.serialization.Serializable
 data class UserMetadata(
     @PrimaryPartitionKey
     val id: String,
+    val email: String
 )

@@ -2,7 +2,7 @@ plugins {
     kotlin("jvm")
 }
 
-group = "com.johnturkson.sync"
+group = "com.johnturkson.sync.generators"
 version = "0.0.1"
 
 repositories {
@@ -18,6 +18,6 @@ dependencies {
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(11))
-        vendor.set(JvmVendorSpec.AMAZON)
+        vendor.set(JvmVendorSpec.GRAAL_VM)
     }
 }
