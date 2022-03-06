@@ -23,6 +23,10 @@ dependencies {
     }
 }
 
+ksp {
+    arg("location", "$group.generated")
+}
+
 kotlin {
     sourceSets {
         main {
