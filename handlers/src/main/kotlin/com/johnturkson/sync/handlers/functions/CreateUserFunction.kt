@@ -47,23 +47,27 @@ class CreateUserFunction :
         val userCredentials = UserCredentials(user.metadata.id, request.password.hashPassword())
         val authorization = Authorization(generateAuthorizationToken(), user.metadata.id)
         
-        Resources.DynamoDbClient.transactWriteItems { transaction ->
-            val emailExistsCondition = Expression.builder()
-                .expression("attribute_not_exists(#email)")
-                .expressionNames(mapOf("#email" to "email"))
-                .build()
-            
-            transaction.addPutItem(
-                Resources.DynamoDbClient.UserEmails,
-                PutItemEnhancedRequest.builder(UserEmail::class.java)
-                    .item(userEmail)
-                    .conditionExpression(emailExistsCondition)
+        runCatching {
+            Resources.DynamoDbClient.transactWriteItems { transaction ->
+                val userEmailExistsCondition = Expression.builder()
+                    .expression("attribute_not_exists(#email)")
+                    .expressionNames(mapOf("#email" to "email"))
                     .build()
-            )
-            transaction.addPutItem(Resources.DynamoDbClient.Users, user)
-            transaction.addPutItem(Resources.DynamoDbClient.UserCredentials, userCredentials)
-            transaction.addPutItem(Resources.DynamoDbClient.Authorization, authorization)
-        }.await()
+                
+                transaction.addPutItem(
+                    Resources.DynamoDbClient.UserEmails,
+                    PutItemEnhancedRequest.builder(UserEmail::class.java)
+                        .item(userEmail)
+                        .conditionExpression(userEmailExistsCondition)
+                        .build()
+                )
+                transaction.addPutItem(Resources.DynamoDbClient.Users, user)
+                transaction.addPutItem(Resources.DynamoDbClient.UserCredentials, userCredentials)
+                transaction.addPutItem(Resources.DynamoDbClient.Authorization, authorization)
+            }.await()
+        }.onFailure {
+            return Failure("User Already Exists", 409)
+        }
         
         return Success(user, authorization, 200)
     }
