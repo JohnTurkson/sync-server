@@ -6,7 +6,7 @@ import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
-import com.johnturkson.sync.generators.annotations.ResourceData
+import com.johnturkson.sync.generators.annotations.dynamodb.ResourceData
 import com.johnturkson.sync.generators.functions.generateBuilderClass
 import com.johnturkson.sync.generators.functions.generateSchemaObject
 

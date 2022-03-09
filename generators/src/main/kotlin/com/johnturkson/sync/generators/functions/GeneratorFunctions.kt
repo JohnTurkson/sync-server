@@ -6,12 +6,12 @@ import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.Dependencies
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
-import com.johnturkson.sync.generators.annotations.Flatten
-import com.johnturkson.sync.generators.annotations.PrimaryPartitionKey
-import com.johnturkson.sync.generators.annotations.PrimarySortKey
-import com.johnturkson.sync.generators.annotations.Resource
-import com.johnturkson.sync.generators.annotations.SecondaryPartitionKey
-import com.johnturkson.sync.generators.annotations.SecondarySortKey
+import com.johnturkson.sync.generators.annotations.dynamodb.Flatten
+import com.johnturkson.sync.generators.annotations.dynamodb.PrimaryPartitionKey
+import com.johnturkson.sync.generators.annotations.dynamodb.PrimarySortKey
+import com.johnturkson.sync.generators.annotations.dynamodb.Resource
+import com.johnturkson.sync.generators.annotations.dynamodb.SecondaryPartitionKey
+import com.johnturkson.sync.generators.annotations.dynamodb.SecondarySortKey
 
 fun generateBuilderClass(
     resourceClass: KSClassDeclaration,
