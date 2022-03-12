@@ -1,6 +1,7 @@
 plugins {
     kotlin("jvm")
     kotlin("plugin.serialization")
+    id("com.google.devtools.ksp")
     id("org.graalvm.buildtools.native")
 }
 
@@ -13,6 +14,8 @@ repositories {
 }
 
 dependencies {
+    implementation(project(":generators"))
+    ksp(project(":generators"))
     implementation(project(":common"))
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.6.10")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
@@ -30,6 +33,18 @@ dependencies {
     implementation("software.amazon.awssdk:dynamodb-enhanced") {
         exclude("software.amazon.awssdk", "netty-nio-client")
         exclude("software.amazon.awssdk", "apache-client")
+    }
+}
+
+ksp {
+    arg("location", "$group.generated")
+}
+
+kotlin {
+    sourceSets {
+        main {
+            kotlin.srcDir("build/generated/ksp/main/kotlin")
+        }
     }
 }
 
