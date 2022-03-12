@@ -23,3 +23,10 @@ dependencies {
 application {
     mainClass.set("com.johnturkson.sync.infrastructure.SyncAppKt")
 }
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(11))
+        vendor.set(JvmVendorSpec.GRAAL_VM)
+    }
+}
