@@ -88,7 +88,7 @@ fun generateBuilderClass(
     generatedResourceBuilderFile.bufferedWriter().use { writer -> writer.write(generatedClass) }
 }
 
-fun generateSchemaObject(
+fun generateDefinitionClass(
     resourceClass: KSClassDeclaration,
     codeGenerator: CodeGenerator,
     options: Map<String, String>,
@@ -98,8 +98,8 @@ fun generateSchemaObject(
     }
     val resourceProperties = resourceClass.getDeclaredProperties()
     val resourceClassName = resourceClass.simpleName.asString()
-    val builderClassName = getBuilderClassName(resourceClassName)
-    val tableClassName = getTableClassName(resourceClassName)
+    val builderClassName = generateBuilderClassName(resourceClassName)
+    val tableClassName = generateDefinitionClassName(resourceClassName)
     val generatedPackageName = requireNotNull(options["location"])
     
     val generatedResourceBuilderFile = codeGenerator.createNewFile(
@@ -157,7 +157,7 @@ fun generateSchemaObject(
         tableIndices += findTableIndices(property, indexAnnotations)
         
         if (Flatten::class.qualifiedName in annotations) {
-            ".flatten(${getTableClassName(type)}.SCHEMA, $resourceClassName::$name, $builderClassName::$name)"
+            ".flatten(${generateDefinitionClassName(type)}.SCHEMA, $resourceClassName::$name, $builderClassName::$name)"
         } else {
             buildString {
                 appendLine(".addAttribute($type::class.java) { attribute ->")
@@ -272,10 +272,10 @@ fun findTableIndices(property: KSPropertyDeclaration, targetAnnotations: Set<Str
     return indices
 }
 
-private fun getBuilderClassName(resource: String, suffix: String = "Builder"): String {
+private fun generateBuilderClassName(resource: String, suffix: String = "Builder"): String {
     return resource + suffix
 }
 
-private fun getTableClassName(resource: String, suffix: String = "Table"): String {
+private fun generateDefinitionClassName(resource: String, suffix: String = "Definition"): String {
     return resource + suffix
 }
