@@ -2,7 +2,6 @@ package com.johnturkson.sync.infrastructure
 
 import software.amazon.awscdk.Duration
 import software.amazon.awscdk.Stack
-import software.amazon.awscdk.StackProps
 import software.amazon.awscdk.services.dynamodb.Attribute
 import software.amazon.awscdk.services.dynamodb.AttributeType
 import software.amazon.awscdk.services.dynamodb.BillingMode
@@ -15,7 +14,7 @@ import software.amazon.awscdk.services.lambda.Function
 import software.amazon.awscdk.services.lambda.Runtime
 import software.constructs.Construct
 
-class SyncStack(parent: Construct, name: String, props: StackProps? = null) : Stack(parent, name, props) {
+class SyncStack(parent: Construct, name: String) : Stack(parent, name) {
     init {
         val table = Table.Builder.create(this, "TestTable2")
             .tableName("TestTable2")
