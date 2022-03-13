@@ -15,9 +15,10 @@ repositories {
 dependencies {
     implementation(project(":generators"))
     ksp(project(":generators"))
+    implementation(project(":common"))
     implementation(project(":handlers"))
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.6.10")
-    implementation("software.amazon.awscdk:aws-cdk-lib:2.15.0")
+    implementation("software.amazon.awscdk:aws-cdk-lib:2.16.0")
 }
 
 application {
