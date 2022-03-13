@@ -3,11 +3,11 @@ package com.johnturkson.sync.handlers.operations
 import com.johnturkson.sync.common.data.Authorization
 import com.johnturkson.sync.common.data.Item
 import com.johnturkson.sync.common.data.UserCredentials
-import com.johnturkson.sync.common.generated.AuthorizationObject.Authorization
-import com.johnturkson.sync.common.generated.ItemObject.Items
-import com.johnturkson.sync.common.generated.ItemObject.ItemsUserIndex
-import com.johnturkson.sync.common.generated.UserCredentialsObject.UserCredentials
-import com.johnturkson.sync.common.generated.UserEmailObject.UserEmails
+import com.johnturkson.sync.common.generated.AuthorizationTable.Authorization
+import com.johnturkson.sync.common.generated.ItemTable.Items
+import com.johnturkson.sync.common.generated.ItemTable.ItemsUserIndex
+import com.johnturkson.sync.common.generated.UserCredentialsTable.UserCredentials
+import com.johnturkson.sync.common.generated.UserEmailTable.UserEmails
 import com.johnturkson.sync.handlers.contexts.AuthorizedContext
 import com.johnturkson.sync.handlers.resources.Resources.DynamoDbClient
 import kotlinx.coroutines.channels.trySendBlocking

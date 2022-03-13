@@ -9,10 +9,10 @@ import com.johnturkson.sync.common.data.User
 import com.johnturkson.sync.common.data.UserCredentials
 import com.johnturkson.sync.common.data.UserEmail
 import com.johnturkson.sync.common.data.UserMetadata
-import com.johnturkson.sync.common.generated.AuthorizationObject.Authorization
-import com.johnturkson.sync.common.generated.UserCredentialsObject.UserCredentials
-import com.johnturkson.sync.common.generated.UserEmailObject.UserEmails
-import com.johnturkson.sync.common.generated.UserObject.Users
+import com.johnturkson.sync.common.generated.AuthorizationTable.Authorization
+import com.johnturkson.sync.common.generated.UserCredentialsTable.UserCredentials
+import com.johnturkson.sync.common.generated.UserEmailTable.UserEmails
+import com.johnturkson.sync.common.generated.UserTable.Users
 import com.johnturkson.sync.common.requests.CreateUserRequest
 import com.johnturkson.sync.common.responses.CreateUserResponse
 import com.johnturkson.sync.common.responses.CreateUserResponse.Failure
@@ -42,31 +42,17 @@ class CreateUserFunction :
     
     override suspend fun processRequest(body: String?): CreateUserResponse {
         val request = decodeRequest(body) ?: return Failure("Invalid Request", 400)
-        val user = User(UserMetadata(generateResourceId(), request.email))
-        val userEmail = UserEmail(user.metadata.email, user.metadata.id)
-        val userCredentials = UserCredentials(user.metadata.id, request.password.hashPassword())
-        val authorization = Authorization(generateAuthorizationToken(), user.metadata.id)
         
-        runCatching {
-            Resources.DynamoDbClient.transactWriteItems { transaction ->
-                val userEmailExistsCondition = Expression.builder()
-                    .expression("attribute_not_exists(#email)")
-                    .expressionNames(mapOf("#email" to "email"))
-                    .build()
-                
-                transaction.addPutItem(
-                    Resources.DynamoDbClient.UserEmails,
-                    PutItemEnhancedRequest.builder(UserEmail::class.java)
-                        .item(userEmail)
-                        .conditionExpression(userEmailExistsCondition)
-                        .build()
-                )
-                transaction.addPutItem(Resources.DynamoDbClient.Users, user)
-                transaction.addPutItem(Resources.DynamoDbClient.UserCredentials, userCredentials)
-                transaction.addPutItem(Resources.DynamoDbClient.Authorization, authorization)
-            }.await()
-        }.onFailure {
+        val user = runCatching {
+            createUser(request)
+        }.getOrElse {
             return Failure("User Already Exists", 409)
+        }
+        
+        val authorization = runCatching {
+            createUserAuthorization(user)
+        }.getOrElse {
+            return Failure("Failed to Create User Token", 500)
         }
         
         return Success(user, authorization, 200)
@@ -80,5 +66,36 @@ class CreateUserFunction :
     
     override fun encodeResponse(response: CreateUserResponse): String {
         return Serializer.encodeToString(CreateUserResponse.serializer(), response)
+    }
+    
+    private suspend fun createUser(request: CreateUserRequest): User {
+        val user = User(UserMetadata(generateResourceId(), request.email))
+        val userEmail = UserEmail(user.metadata.email, user.metadata.id)
+        val userCredentials = UserCredentials(user.metadata.id, request.password.hashPassword())
+        
+        Resources.DynamoDbClient.transactWriteItems { transaction ->
+            val userEmailExistsCondition = Expression.builder()
+                .expression("attribute_not_exists(#email)")
+                .expressionNames(mapOf("#email" to "email"))
+                .build()
+            
+            transaction.addPutItem(
+                Resources.DynamoDbClient.UserEmails,
+                PutItemEnhancedRequest.builder(UserEmail::class.java)
+                    .item(userEmail)
+                    .conditionExpression(userEmailExistsCondition)
+                    .build()
+            )
+            transaction.addPutItem(Resources.DynamoDbClient.Users, user)
+            transaction.addPutItem(Resources.DynamoDbClient.UserCredentials, userCredentials)
+        }.await()
+        
+        return user
+    }
+    
+    private suspend fun createUserAuthorization(user: User): Authorization {
+        val authorization = Authorization(generateAuthorizationToken(), user.metadata.id)
+        Resources.DynamoDbClient.Authorization.putItem(authorization).await()
+        return authorization
     }
 }

@@ -98,14 +98,14 @@ fun generateSchemaObject(
     }
     val resourceProperties = resourceClass.getDeclaredProperties()
     val resourceClassName = resourceClass.simpleName.asString()
-    val builderClassName = "${resourceClassName}Builder"
+    val builderClassName = getBuilderClassName(resourceClassName)
+    val tableClassName = getTableClassName(resourceClassName)
     val generatedPackageName = requireNotNull(options["location"])
-    val generatedClassName = "${resourceClassName}Object"
     
     val generatedResourceBuilderFile = codeGenerator.createNewFile(
         Dependencies.ALL_FILES,
         generatedPackageName,
-        generatedClassName,
+        tableClassName,
         "kt"
     )
     
@@ -157,7 +157,7 @@ fun generateSchemaObject(
         tableIndices += findTableIndices(property, indexAnnotations)
         
         if (Flatten::class.qualifiedName in annotations) {
-            ".flatten(${type}Object.SCHEMA, $resourceClassName::$name, $builderClassName::$name)"
+            ".flatten(${getTableClassName(type)}.SCHEMA, $resourceClassName::$name, $builderClassName::$name)"
         } else {
             buildString {
                 appendLine(".addAttribute($type::class.java) { attribute ->")
@@ -237,7 +237,7 @@ fun generateSchemaObject(
         |
         |${imports.sorted().joinToString(separator = "\n")}
         |
-        |object $generatedClassName {
+        |object $tableClassName {
         |   $definitions
         |}
         |
@@ -270,4 +270,12 @@ fun findTableIndices(property: KSPropertyDeclaration, targetAnnotations: Set<Str
     }
     
     return indices
+}
+
+private fun getBuilderClassName(resource: String, suffix: String = "Builder"): String {
+    return resource + suffix
+}
+
+private fun getTableClassName(resource: String, suffix: String = "Table"): String {
+    return resource + suffix
 }
