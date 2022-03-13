@@ -18,6 +18,7 @@ import software.constructs.Construct
 class SyncStack(parent: Construct, name: String, props: StackProps? = null) : Stack(parent, name, props) {
     init {
         val table = Table.Builder.create(this, "TestTable2")
+            .tableName("TestTable2")
             .billingMode(BillingMode.PAY_PER_REQUEST)
             .partitionKey(Attribute.builder().type(AttributeType.STRING).name("primary").build())
             .sortKey(Attribute.builder().type(AttributeType.STRING).name("secondary").build())
