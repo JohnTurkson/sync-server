@@ -10,6 +10,7 @@ import software.amazon.awscdk.services.dynamodb.GlobalSecondaryIndexProps
 import software.amazon.awscdk.services.dynamodb.LocalSecondaryIndexProps
 import software.amazon.awscdk.services.dynamodb.ProjectionType
 import software.amazon.awscdk.services.dynamodb.Table
+import software.amazon.awscdk.services.dynamodb.TableProps
 import software.amazon.awscdk.services.lambda.Code
 import software.amazon.awscdk.services.lambda.Function
 import software.amazon.awscdk.services.lambda.Runtime
@@ -40,6 +41,7 @@ class SyncStack(parent: Construct, name: String, props: StackProps? = null) : St
         table.addLocalSecondaryIndex(lsi)
         
         Function.Builder.create(this, "TestFunction2")
+            .functionName("TestFunction2")
             .description("test")
             .code(Code.fromAsset("../handlers/build/lambda/image/handlers.zip"))
             .handler("com.johnturkson.sync.handlers.functions.CreateUserFunction")
