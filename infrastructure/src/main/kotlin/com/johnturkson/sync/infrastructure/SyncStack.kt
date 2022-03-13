@@ -10,7 +10,6 @@ import software.amazon.awscdk.services.dynamodb.GlobalSecondaryIndexProps
 import software.amazon.awscdk.services.dynamodb.LocalSecondaryIndexProps
 import software.amazon.awscdk.services.dynamodb.ProjectionType
 import software.amazon.awscdk.services.dynamodb.Table
-import software.amazon.awscdk.services.dynamodb.TableProps
 import software.amazon.awscdk.services.lambda.Code
 import software.amazon.awscdk.services.lambda.Function
 import software.amazon.awscdk.services.lambda.Runtime
