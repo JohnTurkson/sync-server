@@ -10,6 +10,7 @@ import com.johnturkson.sync.common.requests.CreateItemRequest
 import com.johnturkson.sync.common.responses.CreateItemResponse
 import com.johnturkson.sync.common.responses.CreateItemResponse.Failure
 import com.johnturkson.sync.common.responses.CreateItemResponse.Success
+import com.johnturkson.sync.generators.annotations.lambda.Function
 import com.johnturkson.sync.handlers.definitions.LambdaHandler
 import com.johnturkson.sync.handlers.operations.createItem
 import com.johnturkson.sync.handlers.operations.generateResourceId
@@ -17,6 +18,7 @@ import com.johnturkson.sync.handlers.operations.verify
 import com.johnturkson.sync.handlers.resources.Resources.Serializer
 import kotlinx.coroutines.runBlocking
 
+@Function
 class CreateItemFunction :
     RequestHandler<APIGatewayV2HTTPEvent, APIGatewayV2HTTPResponse>,
     LambdaHandler<CreateItemRequest, CreateItemResponse> {

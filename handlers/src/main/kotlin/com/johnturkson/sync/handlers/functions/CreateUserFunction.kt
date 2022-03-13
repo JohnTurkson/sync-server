@@ -17,6 +17,7 @@ import com.johnturkson.sync.common.requests.CreateUserRequest
 import com.johnturkson.sync.common.responses.CreateUserResponse
 import com.johnturkson.sync.common.responses.CreateUserResponse.Failure
 import com.johnturkson.sync.common.responses.CreateUserResponse.Success
+import com.johnturkson.sync.generators.annotations.lambda.Function
 import com.johnturkson.sync.handlers.definitions.LambdaHandler
 import com.johnturkson.sync.handlers.operations.generateAuthorizationToken
 import com.johnturkson.sync.handlers.operations.generateResourceId
@@ -28,6 +29,7 @@ import kotlinx.coroutines.runBlocking
 import software.amazon.awssdk.enhanced.dynamodb.Expression
 import software.amazon.awssdk.enhanced.dynamodb.model.PutItemEnhancedRequest
 
+@Function
 class CreateUserFunction :
     RequestHandler<APIGatewayV2HTTPEvent, APIGatewayV2HTTPResponse>,
     LambdaHandler<CreateUserRequest, CreateUserResponse> {

@@ -8,6 +8,7 @@ import com.johnturkson.sync.common.requests.ListItemsRequest
 import com.johnturkson.sync.common.responses.ListItemsResponse
 import com.johnturkson.sync.common.responses.ListItemsResponse.Failure
 import com.johnturkson.sync.common.responses.ListItemsResponse.Success
+import com.johnturkson.sync.generators.annotations.lambda.Function
 import com.johnturkson.sync.handlers.definitions.LambdaHandler
 import com.johnturkson.sync.handlers.operations.listItems
 import com.johnturkson.sync.handlers.operations.verify
@@ -15,6 +16,7 @@ import com.johnturkson.sync.handlers.resources.Resources.Serializer
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 
+@Function
 class ListItemsFunction :
     RequestHandler<APIGatewayV2HTTPEvent, APIGatewayV2HTTPResponse>,
     LambdaHandler<ListItemsRequest, ListItemsResponse> {

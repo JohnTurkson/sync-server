@@ -39,6 +39,7 @@ dependencies {
 
 ksp {
     arg("location", "$group.generated")
+    arg("HANDLER_LOCATION", "../handlers/build/lambda/image/handlers.zip")
 }
 
 kotlin {

@@ -13,15 +13,15 @@ import com.johnturkson.sync.generators.annotations.dynamodb.Resource
 import com.johnturkson.sync.generators.annotations.dynamodb.SecondaryPartitionKey
 import com.johnturkson.sync.generators.annotations.dynamodb.SecondarySortKey
 
-fun generateBuilderClass(
+internal fun generateBuilderClass(
     resourceClass: KSClassDeclaration,
     codeGenerator: CodeGenerator,
     options: Map<String, String>,
 ) {
     val resourceProperties = resourceClass.getDeclaredProperties()
     val resourceClassName = resourceClass.simpleName.asString()
+    val generatedClassName = generateBuilderClassName(resourceClassName)
     val generatedPackageName = requireNotNull(options["location"])
-    val generatedClassName = "${resourceClassName}Builder"
     
     val generatedResourceBuilderFile = codeGenerator.createNewFile(
         Dependencies.ALL_FILES,
@@ -88,7 +88,7 @@ fun generateBuilderClass(
     generatedResourceBuilderFile.bufferedWriter().use { writer -> writer.write(generatedClass) }
 }
 
-fun generateDefinitionClass(
+internal fun generateDefinitionClass(
     resourceClass: KSClassDeclaration,
     codeGenerator: CodeGenerator,
     options: Map<String, String>,
@@ -272,10 +272,10 @@ fun findTableIndices(property: KSPropertyDeclaration, targetAnnotations: Set<Str
     return indices
 }
 
-private fun generateBuilderClassName(resource: String, suffix: String = "Builder"): String {
+internal fun generateBuilderClassName(resource: String, suffix: String = "Builder"): String {
     return resource + suffix
 }
 
-private fun generateDefinitionClassName(resource: String, suffix: String = "Definition"): String {
+internal fun generateDefinitionClassName(resource: String, suffix: String = "Definition"): String {
     return resource + suffix
 }
