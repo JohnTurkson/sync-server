@@ -1,5 +1,5 @@
 rootProject.name = "sync-server"
+include("cdk")
 include("common")
-include("handlers")
+include("functions")
 include("generators")
-include("infrastructure")
