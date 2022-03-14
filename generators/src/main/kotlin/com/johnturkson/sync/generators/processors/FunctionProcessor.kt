@@ -63,6 +63,7 @@ class FunctionProcessor(
             |    .timeout(Duration.seconds($duration))
             |    .memorySize($memory)
             |    .runtime(Runtime.PROVIDED_AL2)
+            |    .architecture(Architecture.X86_64)
         """.trimMargin()
         
         val generatedClass = """
