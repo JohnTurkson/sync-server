@@ -8,7 +8,6 @@ import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.johnturkson.sync.generators.annotations.lambda.Function
-import com.johnturkson.sync.generators.functions.generateBuilderClassName
 
 class FunctionProcessor(
     private val codeGenerator: CodeGenerator,
@@ -24,7 +23,9 @@ class FunctionProcessor(
             generateFunctionClass(resourceClass, codeGenerator, options)
         }
         
-        generateFunctionsClass(functionClasses)
+        if (functionClasses.toList().isNotEmpty()) {
+            generateFunctionsClass(functionClasses)
+        }
         
         return emptyList()
     }
@@ -38,6 +39,13 @@ class FunctionProcessor(
         val generatedPackageName = requireNotNull(options["location"])
         val handlerLocation = requireNotNull(options["HANDLER_LOCATION"])
         
+        val functionAnnotation = resourceClass.annotations.first { annotation ->
+            val annotationName = annotation.annotationType.resolve().declaration.qualifiedName?.asString()
+            annotationName == Function::class.qualifiedName
+        }
+        
+        val (duration, memory) = functionAnnotation.arguments.map { argument -> argument.value.toString() }
+        
         val imports = """
             import software.amazon.awscdk.Duration
             import software.amazon.awscdk.services.lambda.Code
@@ -50,8 +58,8 @@ class FunctionProcessor(
             |return Function.Builder.create(construct, "$resourceClassName")
             |   .functionName("$resourceClassName")
             |   .code(Code.fromAsset("$handlerLocation"))
-            |   .timeout(Duration.seconds(5))
-            |   .memorySize(1024)
+            |   .timeout(Duration.seconds($duration))
+            |   .memorySize($memory)
             |   .runtime(Runtime.PROVIDED_AL2)
         """.trimMargin()
         
@@ -87,12 +95,11 @@ class FunctionProcessor(
         
         val imports = """
             import software.amazon.awscdk.services.lambda.Function
-            import software.amazon.awscdk.services.lambda.Function.Builder
             import software.constructs.Construct
         """.trimIndent()
         
         val builders = resourceClasses.joinToString(separator = "\n") { resourceClass ->
-            "add(${generateBuilderClassName(resourceClass.simpleName.asString())}(construct))"
+            "add(${resourceClass.simpleName.asString()}.builder(construct))"
         }
         
         val generatedClass = """

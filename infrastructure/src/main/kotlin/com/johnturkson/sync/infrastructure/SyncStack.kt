@@ -1,6 +1,6 @@
 package com.johnturkson.sync.infrastructure
 
-import software.amazon.awscdk.Duration
+import com.johnturkson.sync.handlers.generated.Functions
 import software.amazon.awscdk.Stack
 import software.amazon.awscdk.services.dynamodb.Attribute
 import software.amazon.awscdk.services.dynamodb.AttributeType
@@ -9,9 +9,6 @@ import software.amazon.awscdk.services.dynamodb.GlobalSecondaryIndexProps
 import software.amazon.awscdk.services.dynamodb.LocalSecondaryIndexProps
 import software.amazon.awscdk.services.dynamodb.ProjectionType
 import software.amazon.awscdk.services.dynamodb.Table
-import software.amazon.awscdk.services.lambda.Code
-import software.amazon.awscdk.services.lambda.Function
-import software.amazon.awscdk.services.lambda.Runtime
 import software.constructs.Construct
 
 class SyncStack(parent: Construct, name: String) : Stack(parent, name) {
@@ -38,14 +35,6 @@ class SyncStack(parent: Construct, name: String) : Stack(parent, name) {
         table.addGlobalSecondaryIndex(gsi)
         table.addLocalSecondaryIndex(lsi)
         
-        Function.Builder.create(this, "TestFunction2")
-            .functionName("TestFunction2")
-            .description("test")
-            .code(Code.fromAsset("../handlers/build/lambda/image/handlers.zip"))
-            .handler("com.johnturkson.sync.handlers.functions.CreateUserFunction")
-            .timeout(Duration.seconds(5))
-            .memorySize(1024)
-            .runtime(Runtime.PROVIDED_AL2)
-            .build()
+        Functions.build(this)
     }
 }
