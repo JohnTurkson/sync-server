@@ -49,6 +49,7 @@ class FunctionProcessor(
         
         val imports = """
             import software.amazon.awscdk.Duration
+            import software.amazon.awscdk.services.lambda.Architecture
             import software.amazon.awscdk.services.lambda.Code
             import software.amazon.awscdk.services.lambda.Function
             import software.amazon.awscdk.services.lambda.Runtime
