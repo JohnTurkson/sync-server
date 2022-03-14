@@ -37,6 +37,7 @@ class FunctionProcessor(
     ) {
         val resourceClassName = resourceClass.simpleName.asString()
         val generatedPackageName = requireNotNull(options["location"])
+        val handlerName = resourceClass.qualifiedName?.asString()
         val handlerLocation = requireNotNull(options["HANDLER_LOCATION"])
         
         val functionAnnotation = resourceClass.annotations.first { annotation ->
@@ -56,11 +57,12 @@ class FunctionProcessor(
         
         val builder = """
             |return Function.Builder.create(construct, "$resourceClassName")
-            |   .functionName("$resourceClassName")
-            |   .code(Code.fromAsset("$handlerLocation"))
-            |   .timeout(Duration.seconds($duration))
-            |   .memorySize($memory)
-            |   .runtime(Runtime.PROVIDED_AL2)
+            |    .functionName("$resourceClassName")
+            |    .handler("$handlerName")
+            |    .code(Code.fromAsset("$handlerLocation"))
+            |    .timeout(Duration.seconds($duration))
+            |    .memorySize($memory)
+            |    .runtime(Runtime.PROVIDED_AL2)
         """.trimMargin()
         
         val generatedClass = """
@@ -69,13 +71,13 @@ class FunctionProcessor(
             |$imports
             |
             |object $resourceClassName {
-            |   fun builder(construct: Construct): Function.Builder {
-            |       $builder
-            |   }
+            |    fun builder(construct: Construct): Function.Builder {
+            |        $builder
+            |    }
             |
-            |   fun build(construct: Construct): Function {
-            |       return builder(construct).build()
-            |   }
+            |    fun build(construct: Construct): Function {
+            |        return builder(construct).build()
+            |    }
             |}
         """.trimMargin()
         
@@ -108,15 +110,15 @@ class FunctionProcessor(
             |$imports
             |
             |object Functions {
-            |   fun builders(construct: Construct): List<Function.Builder> {
-            |       return buildList {
-            |           $builders
-            |       }
-            |   }
+            |    fun builders(construct: Construct): List<Function.Builder> {
+            |        return buildList {
+            |            $builders
+            |        }
+            |    }
             |
-            |   fun build(construct: Construct): List<Function> {
-            |       return builders(construct).map { builder -> builder.build() }
-            |   }
+            |    fun build(construct: Construct): List<Function> {
+            |        return builders(construct).map { builder -> builder.build() }
+            |    }
             |}
         """.trimMargin()
         
