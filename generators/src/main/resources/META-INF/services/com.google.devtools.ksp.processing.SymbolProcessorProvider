@@ -2,3 +2,4 @@ com.johnturkson.sync.generators.providers.ResourceProcessorProvider
 com.johnturkson.sync.generators.providers.ResourceMetadataProcessorProvider
 com.johnturkson.sync.generators.providers.ResourceDataProcessorProvider
 com.johnturkson.sync.generators.providers.FunctionProcessorProvider
+com.johnturkson.sync.generators.providers.TableProcessorProvider
