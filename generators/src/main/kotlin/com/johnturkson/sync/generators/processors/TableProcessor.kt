@@ -227,7 +227,10 @@ class TableProcessor(
             add("import software.constructs.Construct")
         }
         
-        val builders = tables.map { table -> "${table.tableAlias}.builder(construct)" }
+        val tableBuilders = tables.map { table -> "${table.tableAlias}.builder(construct)" }
+            .joinToString(separator = ",\n", prefix = "listOf(\n", postfix = "\n)")
+        
+        val builtTables = tables.map { table -> "${table.tableAlias}.build(construct)" }
             .joinToString(separator = ",\n", prefix = "listOf(\n", postfix = "\n)")
         
         val generatedClass = """
@@ -237,11 +240,11 @@ class TableProcessor(
             
             object $generatedClassName {
                 fun builders(construct: Construct): List<Table.Builder> {
-                    return $builders
+                    return $tableBuilders
                 }
                 
                 fun build(construct: Construct): List<Table> {
-                    return builders(construct).map { builder -> builder.build() }
+                    return $builtTables
                 }
             }
         """.trimIndent()
