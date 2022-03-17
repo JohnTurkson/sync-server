@@ -64,18 +64,18 @@ class TableProcessor(
             if (secondaryPartitionKey != null) data = data merge PartialTable(
                 secondaryIndices = listOf(
                     PartialSecondaryIndex(
-                        secondaryPartitionKey.indexName,
-                        secondaryPartitionKey.indexAlias,
-                        tableAttributeKey
+                        indexName = secondaryPartitionKey.indexName,
+                        indexAlias = secondaryPartitionKey.indexAlias,
+                        secondaryPartitionKey = tableAttributeKey
                     )
                 )
             )
             if (secondarySortKey != null) data = data merge PartialTable(
                 secondaryIndices = listOf(
                     PartialSecondaryIndex(
-                        secondarySortKey.indexName,
-                        secondarySortKey.indexAlias,
-                        tableAttributeKey
+                        indexName = secondarySortKey.indexName,
+                        indexAlias = secondarySortKey.indexAlias,
+                        secondarySortKey = tableAttributeKey
                     )
                 )
             )
@@ -84,7 +84,7 @@ class TableProcessor(
                 partialTable
             )
             
-            data
+            data merge partialTable
         }.fold(partialTable) { merged, next -> merged merge next }
     }
     
