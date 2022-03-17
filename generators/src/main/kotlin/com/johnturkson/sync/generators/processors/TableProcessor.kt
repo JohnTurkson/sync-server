@@ -29,13 +29,14 @@ class TableProcessor(
         val resourceClasses = resolver.getSymbolsWithAnnotation(resourceAnnotation)
             .filterIsInstance<KSClassDeclaration>()
         
-        resourceClasses.mapNotNull { resourceClass ->
+        val tables = resourceClasses.mapNotNull { resourceClass ->
             val resource = resourceClass.getAnnotationsByType(Resource::class).first()
             val partialTable = PartialTable(tableName = resource.tableName, tableAlias = resource.tableAlias)
             process(resourceClass, partialTable).asTable()
-        }.forEach { table ->
-            generateFile(table)
         }
+        
+        tables.forEach { table -> generateTableFile(table) }
+        if (tables.toList().isNotEmpty()) generateTablesFile(tables)
         
         return emptyList()
     }
@@ -48,7 +49,7 @@ class TableProcessor(
             val propertyName = property.simpleName.asString()
             val propertyType = property.type.element.toString()
             
-            val tableAttributeKey = Key(propertyName, "STRING")
+            val tableAttributeKey = TableAttributeKey(propertyName, "STRING")
             
             val primaryPartitionKey = property.getAnnotationsByType(PrimaryPartitionKey::class).firstOrNull()
             val primarySortKey = property.getAnnotationsByType(PrimarySortKey::class).firstOrNull()
@@ -56,34 +57,40 @@ class TableProcessor(
             val secondarySortKey = property.getAnnotationsByType(SecondarySortKey::class).firstOrNull()
             val flattenKey = property.getAnnotationsByType(Flatten::class).firstOrNull()
             
-            // TODO multiple can be selected on a single property
-            when {
-                primaryPartitionKey != null -> PartialTable(primaryPartitionKey = tableAttributeKey)
-                primarySortKey != null -> PartialTable(primarySortKey = tableAttributeKey)
-                secondaryPartitionKey != null -> PartialTable(secondaryIndices = listOf(
+            var data = PartialTable()
+            
+            if (primaryPartitionKey != null) data = data merge PartialTable(primaryPartitionKey = tableAttributeKey)
+            if (primarySortKey != null) data = data merge PartialTable(primarySortKey = tableAttributeKey)
+            if (secondaryPartitionKey != null) data = data merge PartialTable(
+                secondaryIndices = listOf(
                     PartialSecondaryIndex(
                         secondaryPartitionKey.indexName,
                         secondaryPartitionKey.indexAlias,
                         tableAttributeKey
                     )
-                ))
-                secondarySortKey != null -> PartialTable(secondaryIndices = listOf(
+                )
+            )
+            if (secondarySortKey != null) data = data merge PartialTable(
+                secondaryIndices = listOf(
                     PartialSecondaryIndex(
                         secondarySortKey.indexName,
                         secondarySortKey.indexAlias,
                         tableAttributeKey
                     )
-                ))
-                flattenKey != null -> process(property.type.resolve().declaration.closestClassDeclaration()!!,
-                    partialTable)
-                else -> PartialTable()
-            }
+                )
+            )
+            if (flattenKey != null) data = data merge process(
+                property.type.resolve().declaration.closestClassDeclaration()!!,
+                partialTable
+            )
+            
+            data
         }.fold(partialTable) { merged, next -> merged merge next }
     }
     
-    private fun generateFile(table: Table) {
+    private fun generateTableFile(table: Table) {
         val generatedPackageName = requireNotNull(options["location"])
-        val generatedClassName = generateTableClassName(table)
+        val generatedClassName = table.tableAlias
         
         val generatedTableFile = codeGenerator.createNewFile(
             Dependencies.ALL_FILES,
@@ -92,20 +99,154 @@ class TableProcessor(
             "kt",
         )
         
-        val generatedClass = """
-            |package $generatedPackageName
-            |
-            |object $generatedClassName
-            |val table =
-            |   ${table.toString().split("\n")}
-            |
-        """.trimMargin()
+        val imports = buildSet {
+            add("import software.amazon.awscdk.services.dynamodb.Attribute")
+            add("import software.amazon.awscdk.services.dynamodb.AttributeType")
+            add("import software.amazon.awscdk.services.dynamodb.BillingMode")
+            add("import software.amazon.awscdk.services.dynamodb.Table")
+            add("import software.constructs.Construct")
+            add("import software.amazon.awscdk.services.dynamodb.GlobalSecondaryIndexProps")
+            if (table.secondaryIndices.isNotEmpty()) {
+                add("import software.amazon.awscdk.services.dynamodb.ProjectionType")
+            }
+        }
         
-        generatedTableFile.bufferedWriter().use { writer -> writer.write(generatedClass) }
+        val builder = buildString {
+            append("""
+                Table.Builder.create(construct, "${table.tableAlias}")
+                    .tableName("${table.tableAlias}")
+                    .billingMode(BillingMode.PAY_PER_REQUEST)
+                    .partitionKey(
+                        Attribute.builder()
+                            .name("${table.primaryPartitionKey.attributeName}")
+                            .type(AttributeType.${table.primaryPartitionKey.attributeType})
+                            .build()
+                    )
+            """.trimIndent())
+            
+            if (table.primarySortKey != null) {
+                append("""
+                    .sortKey(
+                        Attribute.builder().name("${table.primarySortKey.attributeName}").type(AttributeType.${table.primarySortKey.attributeType}).build()
+                    )
+                """.trimIndent())
+            }
+        }
+        
+        val indexBuilders = table.secondaryIndices.joinToString(
+            separator = ",\n",
+            prefix = "listOf(\n",
+            postfix = "\n)",
+        ) { index -> "${index.indexAlias}.builder()" }
+        
+        val indices = table.secondaryIndices.map { index ->
+            val indexBuilder = buildString {
+                append("""
+                    GlobalSecondaryIndexProps.builder()
+                        .indexName("${index.indexName}")
+                        .projectionType(ProjectionType.ALL)
+                        .partitionKey(
+                            Attribute.builder()
+                                .name("${index.secondaryPartitionKey.attributeName}")
+                                .type(AttributeType.${index.secondaryPartitionKey.attributeType})
+                                .build()
+                        )
+                """.trimIndent())
+                
+                if (index.secondarySortKey != null) {
+                    append("""
+                        .sortKey(
+                            Attribute.builder()
+                            .name("${index.secondarySortKey.attributeName}")
+                            .type(AttributeType.${index.secondarySortKey.attributeType})
+                            .build()
+                        )
+                    """.trimIndent())
+                }
+            }
+            
+            val generatedIndexClass = """
+                object ${index.indexAlias} {
+                    fun builder(): GlobalSecondaryIndexProps.Builder {
+                        return $indexBuilder
+                    }
+                    
+                    fun build(): GlobalSecondaryIndexProps {
+                        return builder().build()
+                    }
+                }
+            """.trimMargin()
+            
+            generatedIndexClass
+        }
+        
+        val generatedTableClass = """
+            package $generatedPackageName
+            
+            ${imports.sorted().joinToString(separator = "\n")}
+            
+            object $generatedClassName {
+                fun indexBuilders(): List<GlobalSecondaryIndexProps.Builder> {
+                    return $indexBuilders
+                }
+            
+                fun indices(): List<GlobalSecondaryIndexProps> {
+                    return indexBuilders().map { builder -> builder.build() }
+                }
+            
+                fun builder(construct: Construct): Table.Builder {
+                    return $builder
+                }
+                
+                fun build(construct: Construct): Table {
+                    val table = builder(construct).build()
+                    indices().forEach { index -> table.addGlobalSecondaryIndex(index) }
+                    return table
+                }
+                
+                ${indices.joinToString(separator = "\n")}
+            }
+        """.trimIndent()
+        
+        generatedTableFile.bufferedWriter().use { writer -> writer.write(generatedTableClass) }
     }
     
-    private fun generateTableClassName(table: Table): String {
-        return "${table.tableAlias}Table"
+    private fun generateTablesFile(tables: Sequence<Table>) {
+        val generatedPackageName = requireNotNull(options["location"])
+        val generatedClassName = "Tables"
+        
+        val generatedTablesFile = codeGenerator.createNewFile(
+            Dependencies.ALL_FILES,
+            generatedPackageName,
+            generatedClassName,
+            "kt",
+        )
+        
+        val imports = buildSet {
+            add("import software.amazon.awscdk.services.dynamodb.Table")
+            add("import software.constructs.Construct")
+        }
+        
+        val builders = tables.map { table -> "${table.tableAlias}.builder(construct)" }
+            .joinToString(separator = ",\n", prefix = "listOf(\n", postfix = "\n)")
+        
+        val generatedClass = """
+            package $generatedPackageName
+            
+            ${imports.sorted().joinToString(separator = "\n")}
+            
+            object $generatedClassName {
+                fun builders(construct: Construct): List<Table.Builder> {
+                    return $builders
+                }
+                
+                fun build(construct: Construct): List<Table> {
+                    return builders(construct).map { builder -> builder.build() }
+                }
+            }
+        """.trimIndent()
+        
+        generatedTablesFile.bufferedWriter().use { writer -> writer.write(generatedClass) }
     }
     
     private fun PartialTable.asTable(): Table? {
@@ -159,40 +300,32 @@ class TableProcessor(
     data class Table(
         val tableName: String,
         val tableAlias: String,
-        val primaryPartitionKey: Key,
-        val primarySortKey: Key?,
+        val primaryPartitionKey: TableAttributeKey,
+        val primarySortKey: TableAttributeKey?,
         val secondaryIndices: List<SecondaryIndex>,
     )
     
     data class PartialTable(
         val tableName: String? = null,
         val tableAlias: String? = null,
-        val primaryPartitionKey: Key? = null,
-        val primarySortKey: Key? = null,
+        val primaryPartitionKey: TableAttributeKey? = null,
+        val primarySortKey: TableAttributeKey? = null,
         val secondaryIndices: List<PartialSecondaryIndex> = emptyList(),
     )
     
     data class SecondaryIndex(
         val indexName: String,
         val indexAlias: String,
-        val secondaryPartitionKey: Key,
-        val secondarySortKey: Key?,
+        val secondaryPartitionKey: TableAttributeKey,
+        val secondarySortKey: TableAttributeKey?,
     )
     
     data class PartialSecondaryIndex(
         val indexName: String? = null,
         val indexAlias: String? = null,
-        val secondaryPartitionKey: Key? = null,
-        val secondarySortKey: Key? = null,
+        val secondaryPartitionKey: TableAttributeKey? = null,
+        val secondarySortKey: TableAttributeKey? = null,
     )
     
-    data class Key(val attributeName: String, val attributeType: String)
-    
-    // data class PrimaryPartitionKey(val attributeName: String, val attributeType: String)
-    //
-    // data class PrimarySortKey(val attributeName: String, val attributeType: String)
-    //
-    // data class SecondaryPartitionKey(val attributeName: String, val attributeType: String)
-    //
-    // data class SecondarySortKey(val attributeName: String, val attributeType: String)
+    data class TableAttributeKey(val attributeName: String, val attributeType: String)
 }
