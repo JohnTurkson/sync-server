@@ -7,7 +7,13 @@ import software.constructs.Construct
 
 class SyncStack(parent: Construct, name: String) : Stack(parent, name) {
     init {
-        Functions.build(this)
-        Tables.build(this)
+        val tables = Tables.build(this)
+        val functions = Functions.build(this)
+        
+        tables.forEach { table ->
+            functions.forEach { function ->
+                table.grantReadWriteData(function)
+            }
+        }
     }
 }
