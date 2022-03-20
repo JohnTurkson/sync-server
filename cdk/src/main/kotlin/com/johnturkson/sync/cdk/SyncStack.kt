@@ -2,6 +2,7 @@ package com.johnturkson.sync.cdk
 
 import com.johnturkson.sync.common.generated.Tables
 import com.johnturkson.sync.functions.generated.Functions
+import software.amazon.awscdk.Environment
 import software.amazon.awscdk.Stack
 import software.amazon.awscdk.services.apigatewayv2.alpha.AddRoutesOptions
 import software.amazon.awscdk.services.apigatewayv2.alpha.DomainMappingOptions
@@ -21,6 +22,11 @@ import software.constructs.Construct
 
 class SyncStack(parent: Construct, name: String) : Stack(parent, name) {
     init {
+        Environment.builder()
+            .account(System.getenv("CDK_DEFAULT_ACCOUNT"))
+            .region(System.getenv("CDK_DEFAULT_REGION"))
+            .build()
+        
         val tables = Tables.build(this)
         val functions = Functions.build(this)
         
@@ -64,9 +70,9 @@ class SyncStack(parent: Construct, name: String) : Stack(parent, name) {
         
         val api = HttpApi(this, "Api", HttpApiProps.builder()
             .disableExecuteApiEndpoint(true)
-            .defaultDomainMapping(DomainMappingOptions.builder()
-                .domainName(domainName)
-                .build())
+            .defaultDomainMapping(
+                DomainMappingOptions.builder().domainName(domainName).build()
+            )
             .build())
         
         val routes = functions.map { function ->
