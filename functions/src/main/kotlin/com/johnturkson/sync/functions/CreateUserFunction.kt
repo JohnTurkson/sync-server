@@ -79,7 +79,7 @@ class CreateUserFunction :
     private suspend fun createUser(request: CreateUserRequest): User {
         val user = User(UserMetadata(generateResourceId(), request.email))
         val userEmail = UserEmail(user.metadata.email, user.metadata.id)
-        val userCredentials = UserCredentials(user.metadata.id, request.password.hashPassword())
+        val userCredentials = UserCredentials(user.metadata.email, request.password.hashPassword())
         
         DynamoDbClient.transactWriteItems { transaction ->
             val userEmailExistsCondition = Expression.builder()
@@ -94,8 +94,8 @@ class CreateUserFunction :
                     .conditionExpression(userEmailExistsCondition)
                     .build()
             )
-            transaction.addPutItem(DynamoDbClient.Users, user)
             transaction.addPutItem(DynamoDbClient.UserCredentials, userCredentials)
+            transaction.addPutItem(DynamoDbClient.Users, user)
         }.await()
         
         return user
