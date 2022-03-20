@@ -74,11 +74,11 @@ class SyncStack(
             )
             .build())
         
-        val routes = functions.map { function ->
+        val routes = functions.mapIndexed { index, function ->
             AddRoutesOptions.builder()
-                .path("/${function.functionName}")
+                .path("/$index")
                 .methods(listOf(HttpMethod.GET))
-                .integration(HttpLambdaIntegration("${function.functionName}LambdaIntegration", function))
+                .integration(HttpLambdaIntegration("LambdaIntegration$index", function))
                 .build()
         }
         
