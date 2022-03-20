@@ -19,6 +19,8 @@ dependencies {
     implementation(project(":functions"))
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.6.10")
     implementation("software.amazon.awscdk:aws-cdk-lib:2.17.0")
+    implementation("software.amazon.awscdk:apigatewayv2-alpha:2.17.0-alpha.0")
+    implementation("software.amazon.awscdk:apigatewayv2-integrations-alpha:2.17.0-alpha.0")
 }
 
 application {
