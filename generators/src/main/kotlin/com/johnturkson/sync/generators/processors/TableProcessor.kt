@@ -114,7 +114,7 @@ class TableProcessor(
         val builder = buildString {
             append("""
                 Table.Builder.create(construct, "${table.tableAlias}")
-                    .tableName("${table.tableAlias}")
+                    .tableName("${table.tableName}")
                     .billingMode(BillingMode.PAY_PER_REQUEST)
                     .partitionKey(
                         Attribute.builder()
