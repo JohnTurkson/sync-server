@@ -47,13 +47,13 @@ class SyncStack(
             this,
             "Certificate",
             DnsValidatedCertificateProps.builder()
-                .domainName("johnturkson.com")
+                .domainName("cdk.johnturkson.com")
                 .hostedZone(hostedZone)
                 .build()
         )
         
         val domainName = DomainName.Builder.create(this, "DomainName")
-            .domainName("johnturkson.com")
+            .domainName("cdk.johnturkson.com")
             .certificate(certificate)
             .build()
         
@@ -63,6 +63,7 @@ class SyncStack(
         )
         
         val aRecord = ARecord.Builder.create(this, "ARecord")
+            .recordName("cdk.johnturkson.com")
             .zone(hostedZone)
             .target(RecordTarget.fromAlias(apiDomainProperties))
             .build()
