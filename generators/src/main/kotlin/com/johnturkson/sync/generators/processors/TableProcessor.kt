@@ -100,6 +100,7 @@ class TableProcessor(
         )
         
         val imports = buildSet {
+            add("import software.amazon.awscdk.RemovalPolicy")
             add("import software.amazon.awscdk.services.dynamodb.Attribute")
             add("import software.amazon.awscdk.services.dynamodb.AttributeType")
             add("import software.amazon.awscdk.services.dynamodb.BillingMode")
@@ -116,6 +117,7 @@ class TableProcessor(
                 Table.Builder.create(construct, "${table.tableAlias}")
                     .tableName("${table.tableName}")
                     .billingMode(BillingMode.PAY_PER_REQUEST)
+                    .removalPolicy(RemovalPolicy.DESTROY)
                     .partitionKey(
                         Attribute.builder()
                             .name("${table.primaryPartitionKey.attributeName}")
