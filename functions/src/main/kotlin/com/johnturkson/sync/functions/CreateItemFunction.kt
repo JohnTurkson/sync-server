@@ -10,12 +10,12 @@ import com.johnturkson.sync.common.requests.CreateItemRequest
 import com.johnturkson.sync.common.responses.CreateItemResponse
 import com.johnturkson.sync.common.responses.CreateItemResponse.Failure
 import com.johnturkson.sync.common.responses.CreateItemResponse.Success
-import com.johnturkson.sync.generators.annotations.lambda.Function
 import com.johnturkson.sync.functions.definitions.LambdaHandler
 import com.johnturkson.sync.functions.operations.createItem
 import com.johnturkson.sync.functions.operations.generateResourceId
 import com.johnturkson.sync.functions.operations.verify
 import com.johnturkson.sync.functions.resources.Resources.Serializer
+import com.johnturkson.sync.generators.annotations.lambda.Function
 import kotlinx.coroutines.runBlocking
 
 @Function
