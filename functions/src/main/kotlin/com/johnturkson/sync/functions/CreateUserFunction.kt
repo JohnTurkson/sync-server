@@ -17,13 +17,13 @@ import com.johnturkson.sync.common.requests.CreateUserRequest
 import com.johnturkson.sync.common.responses.CreateUserResponse
 import com.johnturkson.sync.common.responses.CreateUserResponse.Failure
 import com.johnturkson.sync.common.responses.CreateUserResponse.Success
-import com.johnturkson.sync.generators.annotations.lambda.Function
 import com.johnturkson.sync.functions.definitions.LambdaHandler
 import com.johnturkson.sync.functions.operations.generateAuthorizationToken
 import com.johnturkson.sync.functions.operations.generateResourceId
 import com.johnturkson.sync.functions.operations.hashPassword
 import com.johnturkson.sync.functions.resources.Resources.DynamoDbClient
 import com.johnturkson.sync.functions.resources.Resources.Serializer
+import com.johnturkson.sync.generators.annotations.lambda.Function
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.runBlocking
 import software.amazon.awssdk.enhanced.dynamodb.Expression
@@ -47,15 +47,17 @@ class CreateUserFunction :
         
         val user = runCatching {
             createUser(request)
-        }.getOrElse { exception ->
+        }.onFailure { exception ->
             exception.printStackTrace()
+        }.getOrElse {
             return Failure("User Already Exists", 409)
         }
         
         val authorization = runCatching {
             createUserAuthorization(user)
-        }.getOrElse { exception ->
+        }.onFailure { exception ->
             exception.printStackTrace()
+        }.getOrElse {
             return Failure("Failed to Create User Token", 500)
         }
         
@@ -65,6 +67,8 @@ class CreateUserFunction :
     override fun decodeRequest(body: String?): CreateUserRequest? {
         return runCatching {
             body?.let { data -> Serializer.decodeFromString(CreateUserRequest.serializer(), data) }
+        }.onFailure { exception ->
+            exception.printStackTrace()
         }.getOrNull()
     }
     
