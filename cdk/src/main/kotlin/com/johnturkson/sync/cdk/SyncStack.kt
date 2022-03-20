@@ -31,7 +31,7 @@ class SyncStack(
         
         tables.forEach { table ->
             functions.forEach { function ->
-                table.grantReadData(function)
+                table.grantReadWriteData(function)
             }
         }
         
