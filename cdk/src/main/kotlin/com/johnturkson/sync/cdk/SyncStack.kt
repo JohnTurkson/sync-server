@@ -62,7 +62,7 @@ class SyncStack(
             domainName.regionalHostedZoneId
         )
         
-        val aRecord = ARecord.Builder.create(this, "ARecord")
+        ARecord.Builder.create(this, "ARecord")
             .recordName("cdk.johnturkson.com")
             .zone(hostedZone)
             .target(RecordTarget.fromAlias(apiDomainProperties))
