@@ -47,13 +47,15 @@ class CreateUserFunction :
         
         val user = runCatching {
             createUser(request)
-        }.getOrElse {
+        }.getOrElse { exception ->
+            exception.printStackTrace()
             return Failure("User Already Exists", 409)
         }
         
         val authorization = runCatching {
             createUserAuthorization(user)
-        }.getOrElse {
+        }.getOrElse { exception ->
+            exception.printStackTrace()
             return Failure("Failed to Create User Token", 500)
         }
         
