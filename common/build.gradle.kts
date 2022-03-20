@@ -17,7 +17,7 @@ dependencies {
     ksp(project(":generators"))
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.6.10")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
-    implementation("software.amazon.awscdk:aws-cdk-lib:2.16.0")
+    implementation("software.amazon.awscdk:aws-cdk-lib:2.17.0")
     implementation(platform("software.amazon.awssdk:bom:2.16.104"))
     implementation("software.amazon.awssdk:dynamodb-enhanced") {
         exclude("software.amazon.awssdk", "apache-client")

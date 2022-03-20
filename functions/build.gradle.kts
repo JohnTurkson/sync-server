@@ -28,7 +28,7 @@ dependencies {
     implementation("com.amazonaws:aws-lambda-java-core:1.2.1")
     implementation("com.amazonaws:aws-lambda-java-events:3.11.0")
     implementation("com.amazonaws:aws-lambda-java-runtime-interface-client:2.1.0")
-    implementation("software.amazon.awscdk:aws-cdk-lib:2.16.0")
+    implementation("software.amazon.awscdk:aws-cdk-lib:2.17.0")
     implementation(platform("software.amazon.awssdk:bom:2.16.104"))
     implementation("software.amazon.awssdk:netty-nio-client")
     implementation("software.amazon.awssdk:dynamodb-enhanced") {

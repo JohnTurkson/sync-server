@@ -18,7 +18,7 @@ dependencies {
     implementation(project(":common"))
     implementation(project(":functions"))
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.6.10")
-    implementation("software.amazon.awscdk:aws-cdk-lib:2.16.0")
+    implementation("software.amazon.awscdk:aws-cdk-lib:2.17.0")
 }
 
 application {
