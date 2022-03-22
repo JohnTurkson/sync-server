@@ -49,32 +49,31 @@ class FunctionProcessor(
             import software.constructs.Construct
         """.trimIndent()
         
-        val builder = """
-            |return Function.Builder.create(construct, "$resourceClassName")
-            |    .functionName("$resourceClassName")
-            |    .handler("$handlerName")
-            |    .code(Code.fromAsset("$handlerLocation"))
-            |    .timeout(Duration.seconds($duration))
-            |    .memorySize($memory)
-            |    .runtime(Runtime.PROVIDED_AL2)
-            |    .architecture(Architecture.X86_64)
-        """.trimMargin()
-        
         val generatedClass = """
-            |package $generatedPackageName
-            |
-            |$imports
-            |
-            |object $resourceClassName {
-            |    fun builder(construct: Construct): Function.Builder {
-            |        $builder
-            |    }
-            |
-            |    fun build(construct: Construct): Function {
-            |        return builder(construct).build()
-            |    }
-            |}
-        """.trimMargin()
+            package $generatedPackageName
+            
+            $imports
+            
+            object $resourceClassName {
+                private lateinit var instance: Function
+            
+                fun builder(construct: Construct): Function.Builder {
+                    return Function.Builder.create(construct, "$resourceClassName")
+                        .functionName("$resourceClassName")
+                        .handler("$handlerName")
+                        .code(Code.fromAsset("$handlerLocation"))
+                        .timeout(Duration.seconds($duration))
+                        .memorySize($memory)
+                        .runtime(Runtime.PROVIDED_AL2)
+                        .architecture(Architecture.X86_64)
+                }
+            
+                fun build(construct: Construct): Function {
+                    if (!$resourceClassName::instance.isInitialized) instance = builder(construct).build()
+                    return instance
+                }
+            }
+        """.trimIndent()
         
         val generatedResourceBuilderFile = codeGenerator.createNewFile(
             Dependencies.ALL_FILES,
@@ -100,22 +99,22 @@ class FunctionProcessor(
         }
         
         val generatedClass = """
-            |package $generatedPackageName
-            |
-            |$imports
-            |
-            |object Functions {
-            |    fun builders(construct: Construct): List<Function.Builder> {
-            |        return buildList {
-            |            $builders
-            |        }
-            |    }
-            |
-            |    fun build(construct: Construct): List<Function> {
-            |        return builders(construct).map { builder -> builder.build() }
-            |    }
-            |}
-        """.trimMargin()
+            package $generatedPackageName
+            
+            $imports
+            
+            object Functions {
+                fun builders(construct: Construct): List<Function.Builder> {
+                    return buildList {
+                        $builders
+                    }
+                }
+            
+                fun build(construct: Construct): List<Function> {
+                    return builders(construct).map { builder -> builder.build() }
+                }
+            }
+        """.trimIndent()
         
         val generatedResourceBuilderFile = codeGenerator.createNewFile(
             Dependencies.ALL_FILES,
