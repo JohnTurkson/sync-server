@@ -98,6 +98,10 @@ class FunctionProcessor(
             "add(${resourceClass.simpleName.asString()}.builder(construct))"
         }
         
+        val functions = resourceClasses.joinToString(separator = "\n") { resourceClass ->
+            "add(${resourceClass.simpleName.asString()}.build(construct))"
+        }
+        
         val generatedClass = """
             package $generatedPackageName
             
@@ -111,7 +115,9 @@ class FunctionProcessor(
                 }
             
                 fun build(construct: Construct): List<Function> {
-                    return builders(construct).map { builder -> builder.build() }
+                    return buildList {
+                        $functions
+                    }
                 }
             }
         """.trimIndent()
