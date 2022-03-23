@@ -17,7 +17,7 @@ import com.johnturkson.sync.generators.annotations.apigateway.Route
 import kotlinx.coroutines.runBlocking
 
 @Function
-@Route("POST", "https://sync.johnturkson.com/GetItem")
+@Route("POST", "/GetItem")
 class GetItemFunction :
     RequestHandler<APIGatewayV2HTTPEvent, APIGatewayV2HTTPResponse>,
     LambdaHandler<GetItemRequest, GetItemResponse> {

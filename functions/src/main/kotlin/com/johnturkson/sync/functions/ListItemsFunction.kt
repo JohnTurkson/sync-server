@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 
 @Function
-@Route("POST", "https://sync.johnturkson.com/ListItems")
+@Route("POST", "/ListItems")
 class ListItemsFunction :
     RequestHandler<APIGatewayV2HTTPEvent, APIGatewayV2HTTPResponse>,
     LambdaHandler<ListItemsRequest, ListItemsResponse> {

@@ -31,7 +31,7 @@ import software.amazon.awssdk.enhanced.dynamodb.Expression
 import software.amazon.awssdk.enhanced.dynamodb.model.PutItemEnhancedRequest
 
 @Function
-@Route("POST", "https://sync.johnturkson.com/CreateUser")
+@Route("POST", "/CreateUser")
 class CreateUserFunction :
     RequestHandler<APIGatewayV2HTTPEvent, APIGatewayV2HTTPResponse>,
     LambdaHandler<CreateUserRequest, CreateUserResponse> {

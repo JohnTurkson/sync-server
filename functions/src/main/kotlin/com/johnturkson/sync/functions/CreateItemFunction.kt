@@ -20,7 +20,7 @@ import com.johnturkson.sync.generators.annotations.lambda.Function
 import kotlinx.coroutines.runBlocking
 
 @Function
-@Route("POST", "https://sync.johnturkson.com/CreateItem")
+@Route("POST", "/CreateItem")
 class CreateItemFunction :
     RequestHandler<APIGatewayV2HTTPEvent, APIGatewayV2HTTPResponse>,
     LambdaHandler<CreateItemRequest, CreateItemResponse> {
