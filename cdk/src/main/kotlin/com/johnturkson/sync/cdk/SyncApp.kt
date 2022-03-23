@@ -10,8 +10,6 @@ fun main() {
         .account(System.getenv("CDK_DEFAULT_ACCOUNT"))
         .region(System.getenv("CDK_DEFAULT_REGION"))
         .build()
-    SyncStack(app, "SyncStack", StackProps.builder()
-        .env(environment)
-        .build())
+    SyncStack(app, "SyncStack", StackProps.builder().env(environment).build())
     app.synth()
 }

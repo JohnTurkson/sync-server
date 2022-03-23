@@ -23,6 +23,7 @@ import com.johnturkson.sync.functions.operations.generateResourceId
 import com.johnturkson.sync.functions.operations.hashPassword
 import com.johnturkson.sync.functions.resources.Resources.DynamoDbClient
 import com.johnturkson.sync.functions.resources.Resources.Serializer
+import com.johnturkson.sync.generators.annotations.apigateway.Route
 import com.johnturkson.sync.generators.annotations.lambda.Function
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.runBlocking
@@ -30,6 +31,7 @@ import software.amazon.awssdk.enhanced.dynamodb.Expression
 import software.amazon.awssdk.enhanced.dynamodb.model.PutItemEnhancedRequest
 
 @Function
+@Route("POST", "https://sync.johnturkson.com/CreateUser")
 class CreateUserFunction :
     RequestHandler<APIGatewayV2HTTPEvent, APIGatewayV2HTTPResponse>,
     LambdaHandler<CreateUserRequest, CreateUserResponse> {

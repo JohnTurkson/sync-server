@@ -20,16 +20,16 @@ class FunctionProcessor(
             .filterIsInstance<KSClassDeclaration>()
         
         functionClasses.forEach { resourceClass ->
-            generateFunctionClass(resourceClass, codeGenerator)
+            generateFunctionClass(resourceClass)
         }
         if (functionClasses.toList().isNotEmpty()) generateFunctionsClass(functionClasses)
         
         return emptyList()
     }
     
-    private fun generateFunctionClass(resourceClass: KSClassDeclaration, codeGenerator: CodeGenerator) {
+    private fun generateFunctionClass(resourceClass: KSClassDeclaration) {
         val resourceClassName = resourceClass.simpleName.asString()
-        val generatedPackageName = requireNotNull(options["location"])
+        val generatedPackageName = requireNotNull(options["location"]) + ".functions"
         val handlerName = resourceClass.qualifiedName?.asString()
         val handlerLocation = requireNotNull(options["HANDLER_LOCATION"])
         
@@ -86,7 +86,7 @@ class FunctionProcessor(
     }
     
     private fun generateFunctionsClass(resourceClasses: Sequence<KSClassDeclaration>) {
-        val generatedPackageName = requireNotNull(options["location"])
+        val generatedPackageName = requireNotNull(options["location"]) + ".functions"
         val generatedClassName = "Functions"
         
         val imports = """

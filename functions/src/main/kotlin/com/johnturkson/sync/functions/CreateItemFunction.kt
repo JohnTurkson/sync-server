@@ -15,10 +15,12 @@ import com.johnturkson.sync.functions.operations.createItem
 import com.johnturkson.sync.functions.operations.generateResourceId
 import com.johnturkson.sync.functions.operations.verify
 import com.johnturkson.sync.functions.resources.Resources.Serializer
+import com.johnturkson.sync.generators.annotations.apigateway.Route
 import com.johnturkson.sync.generators.annotations.lambda.Function
 import kotlinx.coroutines.runBlocking
 
 @Function
+@Route("POST", "https://sync.johnturkson.com/CreateItem")
 class CreateItemFunction :
     RequestHandler<APIGatewayV2HTTPEvent, APIGatewayV2HTTPResponse>,
     LambdaHandler<CreateItemRequest, CreateItemResponse> {

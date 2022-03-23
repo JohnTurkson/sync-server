@@ -269,9 +269,9 @@ class TableProcessor(
     private fun PartialSecondaryIndex.asSecondaryIndex(): SecondaryIndex? {
         return runCatching {
             SecondaryIndex(
-                indexName!!,
-                indexAlias!!,
-                secondaryPartitionKey!!,
+                requireNotNull(indexName),
+                requireNotNull(indexAlias),
+                requireNotNull(secondaryPartitionKey),
                 secondarySortKey
             )
         }.getOrNull()
@@ -302,7 +302,7 @@ class TableProcessor(
         return PartialSecondaryIndex(indexName, indexAlias, secondaryPartitionKey, secondarySortKey)
     }
     
-    data class Table(
+    private data class Table(
         val tableName: String,
         val tableAlias: String,
         val primaryPartitionKey: TableAttributeKey,
@@ -310,7 +310,7 @@ class TableProcessor(
         val secondaryIndices: List<SecondaryIndex>,
     )
     
-    data class PartialTable(
+    private data class PartialTable(
         val tableName: String? = null,
         val tableAlias: String? = null,
         val primaryPartitionKey: TableAttributeKey? = null,
@@ -318,19 +318,22 @@ class TableProcessor(
         val secondaryIndices: List<PartialSecondaryIndex> = emptyList(),
     )
     
-    data class SecondaryIndex(
+    private data class SecondaryIndex(
         val indexName: String,
         val indexAlias: String,
         val secondaryPartitionKey: TableAttributeKey,
         val secondarySortKey: TableAttributeKey?,
     )
     
-    data class PartialSecondaryIndex(
+    private data class PartialSecondaryIndex(
         val indexName: String? = null,
         val indexAlias: String? = null,
         val secondaryPartitionKey: TableAttributeKey? = null,
         val secondarySortKey: TableAttributeKey? = null,
     )
     
-    data class TableAttributeKey(val attributeName: String, val attributeType: String)
+    private data class TableAttributeKey(
+        val attributeName: String,
+        val attributeType: String,
+    )
 }

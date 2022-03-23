@@ -42,6 +42,8 @@ dependencies {
 ksp {
     arg("location", "$group.generated")
     arg("HANDLER_LOCATION", "../functions/build/lambda/image/functions.zip")
+    arg("HOSTED_ZONE", "johnturkson.com")
+    arg("API_ENDPOINT", "sync.johnturkson.com")
 }
 
 kotlin {
