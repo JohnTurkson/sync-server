@@ -1,7 +1,7 @@
 package com.johnturkson.sync.common.data
 
-import com.johnturkson.sync.generators.annotations.Flatten
-import com.johnturkson.sync.generators.annotations.Resource
+import com.johnturkson.sync.generators.annotations.dynamodb.Flatten
+import com.johnturkson.sync.generators.annotations.dynamodb.Resource
 import kotlinx.serialization.Serializable
 
 @Serializable

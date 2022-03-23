@@ -1,10 +1,10 @@
 plugins {
     kotlin("jvm")
-    kotlin("plugin.serialization")
     id("com.google.devtools.ksp")
+    application
 }
 
-group = "com.johnturkson.sync.common"
+group = "com.johnturkson.sync.cdk"
 version = "0.0.1"
 
 repositories {
@@ -15,28 +15,16 @@ repositories {
 dependencies {
     implementation(project(":generators"))
     ksp(project(":generators"))
+    implementation(project(":common"))
+    implementation(project(":functions"))
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.6.10")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
     implementation("software.amazon.awscdk:aws-cdk-lib:2.17.0")
     implementation("software.amazon.awscdk:apigatewayv2-alpha:2.17.0-alpha.0")
     implementation("software.amazon.awscdk:apigatewayv2-integrations-alpha:2.17.0-alpha.0")
-    implementation(platform("software.amazon.awssdk:bom:2.16.104"))
-    implementation("software.amazon.awssdk:dynamodb-enhanced") {
-        exclude("software.amazon.awssdk", "apache-client")
-        exclude("software.amazon.awssdk", "netty-nio-client")
-    }
 }
 
-ksp {
-    arg("location", "$group.generated")
-}
-
-kotlin {
-    sourceSets {
-        main {
-            kotlin.srcDir("build/generated/ksp/main/kotlin")
-        }
-    }
+application {
+    mainClass.set("com.johnturkson.sync.cdk.SyncAppKt")
 }
 
 java {

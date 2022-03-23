@@ -1,0 +1,3 @@
+{
+  "app": "cd .. && ./gradlew buildLambdaImage run"
+}

@@ -6,22 +6,22 @@ import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.Dependencies
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
-import com.johnturkson.sync.generators.annotations.Flatten
-import com.johnturkson.sync.generators.annotations.PrimaryPartitionKey
-import com.johnturkson.sync.generators.annotations.PrimarySortKey
-import com.johnturkson.sync.generators.annotations.Resource
-import com.johnturkson.sync.generators.annotations.SecondaryPartitionKey
-import com.johnturkson.sync.generators.annotations.SecondarySortKey
+import com.johnturkson.sync.generators.annotations.dynamodb.Flatten
+import com.johnturkson.sync.generators.annotations.dynamodb.PrimaryPartitionKey
+import com.johnturkson.sync.generators.annotations.dynamodb.PrimarySortKey
+import com.johnturkson.sync.generators.annotations.dynamodb.Resource
+import com.johnturkson.sync.generators.annotations.dynamodb.SecondaryPartitionKey
+import com.johnturkson.sync.generators.annotations.dynamodb.SecondarySortKey
 
-fun generateBuilderClass(
+internal fun generateBuilderClass(
     resourceClass: KSClassDeclaration,
     codeGenerator: CodeGenerator,
     options: Map<String, String>,
 ) {
     val resourceProperties = resourceClass.getDeclaredProperties()
     val resourceClassName = resourceClass.simpleName.asString()
+    val generatedClassName = generateBuilderClassName(resourceClassName)
     val generatedPackageName = requireNotNull(options["location"])
-    val generatedClassName = "${resourceClassName}Builder"
     
     val generatedResourceBuilderFile = codeGenerator.createNewFile(
         Dependencies.ALL_FILES,
@@ -88,7 +88,7 @@ fun generateBuilderClass(
     generatedResourceBuilderFile.bufferedWriter().use { writer -> writer.write(generatedClass) }
 }
 
-fun generateSchemaObject(
+internal fun generateDefinitionClass(
     resourceClass: KSClassDeclaration,
     codeGenerator: CodeGenerator,
     options: Map<String, String>,
@@ -98,14 +98,14 @@ fun generateSchemaObject(
     }
     val resourceProperties = resourceClass.getDeclaredProperties()
     val resourceClassName = resourceClass.simpleName.asString()
-    val builderClassName = "${resourceClassName}Builder"
+    val builderClassName = generateBuilderClassName(resourceClassName)
+    val tableClassName = generateDefinitionClassName(resourceClassName)
     val generatedPackageName = requireNotNull(options["location"])
-    val generatedClassName = "${resourceClassName}Object"
     
     val generatedResourceBuilderFile = codeGenerator.createNewFile(
         Dependencies.ALL_FILES,
         generatedPackageName,
-        generatedClassName,
+        tableClassName,
         "kt"
     )
     
@@ -157,7 +157,7 @@ fun generateSchemaObject(
         tableIndices += findTableIndices(property, indexAnnotations)
         
         if (Flatten::class.qualifiedName in annotations) {
-            ".flatten(${type}Object.SCHEMA, $resourceClassName::$name, $builderClassName::$name)"
+            ".flatten(${generateDefinitionClassName(type)}.SCHEMA, $resourceClassName::$name, $builderClassName::$name)"
         } else {
             buildString {
                 appendLine(".addAttribute($type::class.java) { attribute ->")
@@ -237,7 +237,7 @@ fun generateSchemaObject(
         |
         |${imports.sorted().joinToString(separator = "\n")}
         |
-        |object $generatedClassName {
+        |object $tableClassName {
         |   $definitions
         |}
         |
@@ -270,4 +270,12 @@ fun findTableIndices(property: KSPropertyDeclaration, targetAnnotations: Set<Str
     }
     
     return indices
+}
+
+internal fun generateBuilderClassName(resource: String, suffix: String = "Builder"): String {
+    return resource + suffix
+}
+
+internal fun generateDefinitionClassName(resource: String, suffix: String = "Definition"): String {
+    return resource + suffix
 }

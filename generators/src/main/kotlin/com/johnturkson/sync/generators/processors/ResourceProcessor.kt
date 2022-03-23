@@ -6,9 +6,9 @@ import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
-import com.johnturkson.sync.generators.annotations.Resource
+import com.johnturkson.sync.generators.annotations.dynamodb.Resource
 import com.johnturkson.sync.generators.functions.generateBuilderClass
-import com.johnturkson.sync.generators.functions.generateSchemaObject
+import com.johnturkson.sync.generators.functions.generateDefinitionClass
 
 class ResourceProcessor(
     private val codeGenerator: CodeGenerator,
@@ -22,7 +22,7 @@ class ResourceProcessor(
         
         resourceClasses.forEach { resourceClass ->
             generateBuilderClass(resourceClass, codeGenerator, options)
-            generateSchemaObject(resourceClass, codeGenerator, options)
+            generateDefinitionClass(resourceClass, codeGenerator, options)
         }
         
         return emptyList()
