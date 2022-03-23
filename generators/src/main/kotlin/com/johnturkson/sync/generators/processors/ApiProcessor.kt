@@ -124,6 +124,7 @@ class ApiProcessor(
                         construct,
                         "HttpApi[$apiEndpoint]",
                         HttpApiProps.builder()
+                            .apiName("$apiEndpoint")
                             .disableExecuteApiEndpoint(true)
                             .defaultDomainMapping(domainMappingOptions)
                             .build()
