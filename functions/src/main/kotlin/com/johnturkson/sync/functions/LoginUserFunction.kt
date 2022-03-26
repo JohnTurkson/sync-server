@@ -7,15 +7,15 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPResponse
 import com.johnturkson.sync.common.requests.LoginUserRequest
 import com.johnturkson.sync.common.responses.LoginUserResponse
 import com.johnturkson.sync.common.responses.LoginUserResponse.Failure
-import com.johnturkson.sync.generators.annotations.lambda.Function
 import com.johnturkson.sync.functions.definitions.LambdaHandler
 import com.johnturkson.sync.functions.operations.verify
 import com.johnturkson.sync.functions.resources.Resources.Serializer
-import com.johnturkson.sync.generators.annotations.apigateway.Route
+import com.johnturkson.sync.generators.annotations.apigateway.HttpApiRoute
+import com.johnturkson.sync.generators.annotations.lambda.Function
 import kotlinx.coroutines.runBlocking
 
 @Function
-@Route("POST", "/LoginUser")
+@HttpApiRoute("POST", "sync.johnturkson.com", "/LoginUser")
 class LoginUserFunction :
     RequestHandler<APIGatewayV2HTTPEvent, APIGatewayV2HTTPResponse>,
     LambdaHandler<LoginUserRequest, LoginUserResponse> {

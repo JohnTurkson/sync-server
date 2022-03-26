@@ -8,16 +8,16 @@ import com.johnturkson.sync.common.requests.GetItemRequest
 import com.johnturkson.sync.common.responses.GetItemResponse
 import com.johnturkson.sync.common.responses.GetItemResponse.Failure
 import com.johnturkson.sync.common.responses.GetItemResponse.Success
-import com.johnturkson.sync.generators.annotations.lambda.Function
 import com.johnturkson.sync.functions.definitions.LambdaHandler
 import com.johnturkson.sync.functions.operations.getItem
 import com.johnturkson.sync.functions.operations.verify
 import com.johnturkson.sync.functions.resources.Resources.Serializer
-import com.johnturkson.sync.generators.annotations.apigateway.Route
+import com.johnturkson.sync.generators.annotations.apigateway.HttpApiRoute
+import com.johnturkson.sync.generators.annotations.lambda.Function
 import kotlinx.coroutines.runBlocking
 
 @Function
-@Route("POST", "/GetItem")
+@HttpApiRoute("POST", "sync.johnturkson.com", "/GetItem")
 class GetItemFunction :
     RequestHandler<APIGatewayV2HTTPEvent, APIGatewayV2HTTPResponse>,
     LambdaHandler<GetItemRequest, GetItemResponse> {
