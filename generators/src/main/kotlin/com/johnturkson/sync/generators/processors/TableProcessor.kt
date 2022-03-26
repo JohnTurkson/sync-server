@@ -26,10 +26,9 @@ class TableProcessor(
 ) : SymbolProcessor {
     override fun process(resolver: Resolver): List<KSAnnotated> {
         val resourceAnnotation = requireNotNull(Resource::class.qualifiedName)
-        val resourceClasses = resolver.getSymbolsWithAnnotation(resourceAnnotation)
+        val tableClasses = resolver.getSymbolsWithAnnotation(resourceAnnotation)
             .filterIsInstance<KSClassDeclaration>()
-        
-        val tables = resourceClasses.mapNotNull { resourceClass ->
+        val tables = tableClasses.mapNotNull { resourceClass ->
             val resource = resourceClass.getAnnotationsByType(Resource::class).first()
             val partialTable = PartialTable(tableName = resource.tableName, tableAlias = resource.tableAlias)
             process(resourceClass, partialTable).asTable()

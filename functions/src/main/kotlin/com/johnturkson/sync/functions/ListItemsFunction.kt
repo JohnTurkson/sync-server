@@ -8,17 +8,17 @@ import com.johnturkson.sync.common.requests.ListItemsRequest
 import com.johnturkson.sync.common.responses.ListItemsResponse
 import com.johnturkson.sync.common.responses.ListItemsResponse.Failure
 import com.johnturkson.sync.common.responses.ListItemsResponse.Success
-import com.johnturkson.sync.generators.annotations.lambda.Function
 import com.johnturkson.sync.functions.definitions.LambdaHandler
 import com.johnturkson.sync.functions.operations.listItems
 import com.johnturkson.sync.functions.operations.verify
 import com.johnturkson.sync.functions.resources.Resources.Serializer
-import com.johnturkson.sync.generators.annotations.apigateway.Route
+import com.johnturkson.sync.generators.annotations.apigateway.HttpApiRoute
+import com.johnturkson.sync.generators.annotations.lambda.Function
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 
 @Function
-@Route("POST", "/ListItems")
+@HttpApiRoute("POST", "sync.johnturkson.com", "/ListItems")
 class ListItemsFunction :
     RequestHandler<APIGatewayV2HTTPEvent, APIGatewayV2HTTPResponse>,
     LambdaHandler<ListItemsRequest, ListItemsResponse> {
