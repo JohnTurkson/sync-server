@@ -19,9 +19,7 @@ class FunctionProcessor(
         val functionClasses = resolver.getSymbolsWithAnnotation(functionAnnotation)
             .filterIsInstance<KSClassDeclaration>()
         
-        functionClasses.forEach { resourceClass ->
-            generateFunctionClass(resourceClass)
-        }
+        functionClasses.forEach { resourceClass -> generateFunctionClass(resourceClass) }
         if (functionClasses.toList().isNotEmpty()) generateFunctionsClass(functionClasses)
         
         return emptyList()

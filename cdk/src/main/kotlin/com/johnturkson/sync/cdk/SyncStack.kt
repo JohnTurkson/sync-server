@@ -13,8 +13,14 @@ class SyncStack(
     props: StackProps? = null,
 ) : Stack(parent, name, props) {
     init {
-        Tables.build(this)
-        Functions.build(this)
-        HttpApis.build(this)
+        val tables = Tables.build(this)
+        val functions = Functions.build(this)
+        val httpApis = HttpApis.build(this)
+
+        tables.forEach { table ->
+            functions.forEach { function ->
+                table.grantReadWriteData(function)
+            }
+        }
     }
 }
