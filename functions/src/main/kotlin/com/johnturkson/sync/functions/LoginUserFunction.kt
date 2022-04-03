@@ -10,8 +10,8 @@ import com.johnturkson.sync.common.responses.LoginUserResponse.Failure
 import com.johnturkson.sync.functions.definitions.LambdaHandler
 import com.johnturkson.sync.functions.operations.verify
 import com.johnturkson.sync.functions.resources.Resources.Serializer
-import com.johnturkson.sync.generators.annotations.apigateway.HttpApiRoute
-import com.johnturkson.sync.generators.annotations.lambda.Function
+import com.johnturkson.cdk.generator.annotations.apigateway.HttpApiRoute
+import com.johnturkson.cdk.generator.annotations.lambda.Function
 import kotlinx.coroutines.runBlocking
 
 @Function

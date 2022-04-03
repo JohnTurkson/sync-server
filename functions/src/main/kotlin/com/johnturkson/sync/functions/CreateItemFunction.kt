@@ -15,8 +15,8 @@ import com.johnturkson.sync.functions.operations.createItem
 import com.johnturkson.sync.functions.operations.generateResourceId
 import com.johnturkson.sync.functions.operations.verify
 import com.johnturkson.sync.functions.resources.Resources.Serializer
-import com.johnturkson.sync.generators.annotations.apigateway.HttpApiRoute
-import com.johnturkson.sync.generators.annotations.lambda.Function
+import com.johnturkson.cdk.generator.annotations.apigateway.HttpApiRoute
+import com.johnturkson.cdk.generator.annotations.lambda.Function
 import kotlinx.coroutines.runBlocking
 
 @Function

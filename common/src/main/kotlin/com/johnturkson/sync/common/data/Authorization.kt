@@ -1,9 +1,9 @@
 package com.johnturkson.sync.common.data
 
-import com.johnturkson.sync.generators.annotations.dynamodb.PrimaryPartitionKey
-import com.johnturkson.sync.generators.annotations.dynamodb.Resource
-import com.johnturkson.sync.generators.annotations.dynamodb.SecondaryPartitionKey
-import com.johnturkson.sync.generators.annotations.dynamodb.SecondarySortKey
+import com.johnturkson.cdk.generator.annotations.dynamodb.PrimaryPartitionKey
+import com.johnturkson.cdk.generator.annotations.dynamodb.Resource
+import com.johnturkson.cdk.generator.annotations.dynamodb.SecondaryPartitionKey
+import com.johnturkson.cdk.generator.annotations.dynamodb.SecondarySortKey
 import kotlinx.serialization.Serializable
 
 @Serializable
