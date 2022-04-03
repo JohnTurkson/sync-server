@@ -1,6 +1,6 @@
 package com.johnturkson.sync.common.data
 
-import com.johnturkson.sync.generators.annotations.dynamodb.ResourceData
+import com.johnturkson.cdk.generator.annotations.dynamodb.ResourceData
 import kotlinx.serialization.Serializable
 
 @Serializable

@@ -1,6 +1,5 @@
 plugins {
     kotlin("jvm")
-    id("com.google.devtools.ksp")
     application
 }
 
@@ -13,8 +12,6 @@ repositories {
 }
 
 dependencies {
-    implementation(project(":generators"))
-    ksp(project(":generators"))
     implementation(project(":common"))
     implementation(project(":functions"))
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.6.10")

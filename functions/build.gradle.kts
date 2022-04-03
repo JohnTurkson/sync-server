@@ -14,9 +14,9 @@ repositories {
 }
 
 dependencies {
-    implementation(project(":generators"))
-    ksp(project(":generators"))
     implementation(project(":common"))
+    implementation("com.johnturkson.cdk:cdk-generator:0.0.1")
+    ksp("com.johnturkson.cdk:cdk-generator:0.0.1")
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.6.10")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.6.0")

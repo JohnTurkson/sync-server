@@ -13,8 +13,8 @@ repositories {
 }
 
 dependencies {
-    implementation(project(":generators"))
-    ksp(project(":generators"))
+    implementation("com.johnturkson.cdk:cdk-generator:0.0.1")
+    ksp("com.johnturkson.cdk:cdk-generator:0.0.1")
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.6.10")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
     implementation("software.amazon.awscdk:aws-cdk-lib:2.17.0")

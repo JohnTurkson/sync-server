@@ -23,8 +23,8 @@ import com.johnturkson.sync.functions.operations.generateResourceId
 import com.johnturkson.sync.functions.operations.hashPassword
 import com.johnturkson.sync.functions.resources.Resources.DynamoDbClient
 import com.johnturkson.sync.functions.resources.Resources.Serializer
-import com.johnturkson.sync.generators.annotations.apigateway.HttpApiRoute
-import com.johnturkson.sync.generators.annotations.lambda.Function
+import com.johnturkson.cdk.generator.annotations.apigateway.HttpApiRoute
+import com.johnturkson.cdk.generator.annotations.lambda.Function
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.runBlocking
 import software.amazon.awssdk.enhanced.dynamodb.Expression

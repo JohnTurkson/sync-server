@@ -12,8 +12,8 @@ import com.johnturkson.sync.functions.definitions.LambdaHandler
 import com.johnturkson.sync.functions.operations.listItems
 import com.johnturkson.sync.functions.operations.verify
 import com.johnturkson.sync.functions.resources.Resources.Serializer
-import com.johnturkson.sync.generators.annotations.apigateway.HttpApiRoute
-import com.johnturkson.sync.generators.annotations.lambda.Function
+import com.johnturkson.cdk.generator.annotations.apigateway.HttpApiRoute
+import com.johnturkson.cdk.generator.annotations.lambda.Function
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 
